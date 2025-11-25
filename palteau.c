@@ -1,0 +1,1071 @@
+// gcc palteau.c dice3d.c nine.c four.c five.c teleport7.c fifteen.c eighteen.c sudoku.c demineurgraphique.c -Iinclude -Llib -lraylib -lopengl32 -lgdi32 -lwinmm -o plateau.exe
+
+#include <math.h>
+#include "raylib.h"
+#include "dice3d.h"
+#include "nine.h"
+#include "player.h"
+#include "sudoku.h"
+#include <stdlib.h>
+#include <stdbool.h>
+#include <time.h>
+#include <stdio.h>
+#include "eighteen.h"
+#include "raymath.h"
+#include "fifteen.h"
+#include "teleport7.h"
+#include "four.h"
+#include "demineur.h"
+#include "five.h"
+
+#define CASES_PAR_COTE 6
+
+typedef enum { STATE_MENU, STATE_OPTIONS, STATE_BOARD, STATE_WIN } GameState;
+bool musicEnabled = true;
+
+// ============================================================
+// Utils
+// ============================================================
+Vector2 CaseToPos(int index, int offsetX, int offsetY, int tailleCase)
+{
+    // Coordonnées EXACTES selon ton schéma jaune
+
+    int col[20] = {
+        0, 1, 2, 3,      // 0-3
+        3,               // 4
+        3, 2, 1,          // 5-7
+        1,                // 8
+        1, 2, 3, 4, 5,   // 9-13
+        5,               // 14
+        5, 6, 7,         // 15-17
+        7,               // 18
+        7                // 19
+    };
+    
+
+    int row[20] = {
+        0, 0, 0, 0,      // 0-3
+        1,               // 4
+        2, 2, 2,         // 5-7
+        3,               // 8
+        4, 4, 4, 4, 4,   // 9-13
+        3,               // 14
+        2, 2, 2,         // 15-17
+        3,               // 18
+        4                // 19
+    };
+    
+    float x = offsetX + col[index] * tailleCase;
+    float y = offsetY + row[index] * tailleCase;
+
+    return (Vector2){ x, y };
+}
+
+bool DrawButton(Font font, const char *text, Rectangle rec, Color normal, Color hover, int size) {
+    Vector2 mouse = GetMousePosition();
+    bool h = CheckCollisionPointRec(mouse, rec);
+    Color c = h ? hover : normal;
+    DrawRectangleRounded(rec, 0.25f, 10, c);
+    DrawRectangleRoundedLines(rec, 0.25f, 10, Fade(BLACK, 0.25f));
+    Vector2 s = MeasureTextEx(font, text, size, 0);
+    DrawTextEx(font, text, (Vector2){rec.x + rec.width/2 - s.x/2, rec.y + rec.height/2 - s.y/2}, size, 0, WHITE);
+    return h && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+}
+
+// petit label aligné à gauche
+void DrawLabelL(Font font, const char *text, Vector2 pos, int size, Color col) {
+    DrawTextEx(font, text, pos, size, 0, col);
+}
+// ============================================================
+// Dessin des points (pips) d'un dé dans un rectangle
+// ============================================================
+void DrawDiceDots(Rectangle rect, int value, Color color) {
+    float cx = rect.x + rect.width  / 2.0f;
+    float cy = rect.y + rect.height / 2.0f;
+    float r  = 12.0f;   // rayon des points
+
+    float dx = rect.width  / 4.0f;
+    float dy = rect.height / 4.0f;
+
+    // Positions standards des 9 points
+    Vector2 p1 = { cx - dx, cy - dy };
+    Vector2 p2 = { cx,      cy - dy };
+    Vector2 p3 = { cx + dx, cy - dy };
+    Vector2 p4 = { cx - dx, cy      };
+    Vector2 p5 = { cx,      cy      };
+    Vector2 p6 = { cx + dx, cy      };
+    Vector2 p7 = { cx - dx, cy + dy };
+    Vector2 p8 = { cx,      cy + dy };
+    Vector2 p9 = { cx + dx, cy + dy };
+
+    switch (value) {
+        case 1:
+            DrawCircleV(p5, r, color);
+            break;
+        case 2:
+            DrawCircleV(p1, r, color);
+            DrawCircleV(p9, r, color);
+            break;
+        case 3:
+            DrawCircleV(p1, r, color);
+            DrawCircleV(p5, r, color);
+            DrawCircleV(p9, r, color);
+            break;
+        case 4:
+            DrawCircleV(p1, r, color);
+            DrawCircleV(p3, r, color);
+            DrawCircleV(p7, r, color);
+            DrawCircleV(p9, r, color);
+            break;
+        case 5:
+            DrawCircleV(p1, r, color);
+            DrawCircleV(p3, r, color);
+            DrawCircleV(p5, r, color);
+            DrawCircleV(p7, r, color);
+            DrawCircleV(p9, r, color);
+            break;
+        case 6:
+            DrawCircleV(p1, r, color);
+            DrawCircleV(p3, r, color);
+            DrawCircleV(p4, r, color);
+            DrawCircleV(p6, r, color);
+            DrawCircleV(p7, r, color);
+            DrawCircleV(p9, r, color);
+            break;
+        default:
+            break;
+    }
+}
+
+// ============================================================
+// Surbrillance bleue quand la souris survole un dé
+// ============================================================
+void DrawDiceHighlight(Rectangle rect) {
+    // Halo bleu translucide
+    DrawRectangleRounded(rect, 0.35f, 8, (Color){80,140,255,60});
+
+    // Contour bleu vif
+    DrawRectangleRoundedLines(rect, 0.35f, 8, (Color){80,140,255,220});
+}
+
+// ============================================================
+// Plateau (affichage)
+// ============================================================
+
+void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int tailleCase,
+                 Color caseA, Color caseB, Color contour, Color accent)
+{
+    for (int i = 0; i < totalCases; i++) {
+
+        Vector2 pos = CaseToPos(i, offsetX, offsetY, tailleCase);
+        Rectangle r = (Rectangle){pos.x, pos.y, tailleCase, tailleCase};
+
+        // Couleur de fond de case (alterné)
+        Color base = (i % 2 == 0) ? caseA : caseB;
+        DrawRectangle(pos.x, pos.y, tailleCase, tailleCase, base);
+        DrawRectangleRoundedLines(r, 0.15f, 6, Fade(contour, 0.35f));
+
+        // ------ CASE SPÉCIALE 9 : RECULE ------
+        if (i == 9) {
+            const char *l1 = "SURPRISE";
+            const char *l2 = "MAGIQUE !";
+
+            int size1 = 28;
+            int size2 = 22;
+
+            Vector2 s1 = MeasureTextEx(font, l1, size1, 0);
+            Vector2 s2 = MeasureTextEx(font, l2, size2, 0);
+
+            float x1 = pos.x + (tailleCase - s1.x) / 2;
+            float x2 = pos.x + (tailleCase - s2.x) / 2;
+            float baseY = pos.y + (tailleCase - (s1.y + s2.y)) / 2;
+
+            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0, (Color){200,50,50,255});
+            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 4}, size2, 0, (Color){200,50,50,255});
+
+            DrawTextEx(font, TextFormat("%d", i), 
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+        else if (i == 1) {
+            const char *txt = "SUDOKU";
+            Color col = DARKBLUE; // facile → bleu
+        
+            Vector2 s = MeasureTextEx(font, txt, 24, 0);
+            DrawTextEx(font, txt,
+                       (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},
+                       24, 0, col);
+        
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+        else if (i == 3 || i == 11 || i == 16) {
+            const char *txt = "PENDU";
+            Color col = DARKBLUE;
+        
+            Vector2 s = MeasureTextEx(font, txt, 24, 0);
+        
+            DrawTextEx(font, txt,
+                       (Vector2){pos.x + (tailleCase - s.x)/2,
+                                 pos.y + (tailleCase - s.y)/2},
+                       24, 0, col);
+        
+            // numéro de la case
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8},
+                       28, 0, accent);
+        }
+        else if (i == 5) {
+            const char *txt = "RETOUR DEPART";
+            Color col = RED; // couleur au choix
+
+            Vector2 s = MeasureTextEx(font, txt, 24, 0);
+            DrawTextEx(font, txt,
+                       (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},
+                       24, 0, col);
+
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+        else if (i == 4) {
+            const char *l1 = "BONUS";
+            const char *l2 = "ou... MALUS ?";
+
+            int size1 = 28;
+            int size2 = 22;
+
+            Vector2 s1 = MeasureTextEx(font, l1, size1, 0);
+            Vector2 s2 = MeasureTextEx(font, l2, size2, 0);
+
+            float x1 = pos.x + (tailleCase - s1.x) / 2;
+            float x2 = pos.x + (tailleCase - s2.x) / 2;
+
+            float baseY = pos.y + (tailleCase - (s1.y + s2.y + 4)) / 2;
+
+            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0,
+                       (Color){0,150,0,255});    // vert bonus
+
+            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 4}, size2, 0,
+                       (Color){0,150,0,255});
+
+            // numéro de la case (comme toutes les autres)
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+
+            } else if (i == 7) {
+            const char *txt1 = "TELEPORTATION";
+            const char *txt2 = "MAGIQUE !";
+        
+            int size1 = 22;
+            int size2 = 18;
+        
+            Vector2 s1 = MeasureTextEx(font, txt1, size1, 0);
+            Vector2 s2 = MeasureTextEx(font, txt2, size2, 0);
+        
+            float x1 = pos.x + (tailleCase - s1.x)/2;
+            float x2 = pos.x + (tailleCase - s2.x)/2;
+            float baseY = pos.y + (tailleCase - (s1.y + s2.y + 4)) / 2;
+        
+            DrawTextEx(font, txt1, (Vector2){x1, baseY}, size1, 0, (Color){0,120,200,255});
+            DrawTextEx(font, txt2, (Vector2){x2, baseY + s1.y + 4}, size2, 0, (Color){0,120,200,255});
+        
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+        
+                // ------ CASE SPÉCIALE 8 : MORPION ------
+        else if (i == 8) {
+            const char *txt = "MORPION";
+            Color col = PURPLE; // couleur au choix
+
+            Vector2 s = MeasureTextEx(font, txt, 24, 0);
+            DrawTextEx(font, txt,
+                       (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},
+                       24, 0, col);
+
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+        else if (i == 14) {
+            const char *txt = "MORPION";
+            Color col = PURPLE;
+        
+            Vector2 s = MeasureTextEx(font, txt, 24, 0);
+            DrawTextEx(font, txt,
+                       (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},
+                       24, 0, col);
+        
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+        
+        // ------ CASE SPÉCIALE 10 : SUDOKU ------
+        else if (i == 10) {
+            const char *txt = "SUDOKU";
+            Color col = ORANGE; // moyen → orange
+        
+            Vector2 s = MeasureTextEx(font, txt, 24, 0);
+            DrawTextEx(font, txt,
+                       (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},
+                       24, 0, col);
+        
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+        else if (i == 12) {
+            const char *txt1 = "REPOS";
+            const char *txt2 = "MERITE !";
+        
+            int size1 = 22;
+            int size2 = 18;
+        
+            Vector2 s1 = MeasureTextEx(font, txt1, size1, 0);
+            Vector2 s2 = MeasureTextEx(font, txt2, size2, 0);
+        
+            float x1 = pos.x + (tailleCase - s1.x)/2;
+            float x2 = pos.x + (tailleCase - s2.x)/2;
+            float baseY = pos.y + (tailleCase - (s1.y + s2.y + 4)) / 2;
+        
+            DrawTextEx(font, txt1, (Vector2){x1, baseY}, size1, 0, (Color){0,120,200,255});
+            DrawTextEx(font, txt2, (Vector2){x2, baseY + s1.y + 4}, size2, 0, (Color){0,120,200,255});
+        
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+
+        } else if (i == 15) {
+            const char *l1 = "CADEAU";
+            const char *l2 = "SURPRISE !";
+        
+            int size1 = 28;
+            int size2 = 24;
+        
+            Vector2 s1 = MeasureTextEx(font, l1, size1, 0);
+            Vector2 s2 = MeasureTextEx(font, l2, size2, 0);
+        
+            float x1 = pos.x + (tailleCase - s1.x) / 2;
+            float x2 = pos.x + (tailleCase - s2.x) / 2;
+            float baseY = pos.y + (tailleCase - (s1.y + s2.y + 6)) / 2;
+        
+            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0, (Color){0,120,200,255});
+            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 6}, size2, 0, (Color){0,120,200,255});
+        
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+        
+        else if (i == 17) {
+            const char *txt = "SUDOKU";
+            Color col = (Color){180,40,40,255}; // difficile → rouge
+        
+            Vector2 s = MeasureTextEx(font, txt, 24, 0);
+            DrawTextEx(font, txt,
+                       (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},
+                       24, 0, col);
+        
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+        else if (i == 18) {
+            const char *l1 = "SURPRISE";
+            const char *l2 = "DU PERE NOEL !";
+        
+            int size1 = 28;
+            int size2 = 22;
+        
+            Vector2 s1 = MeasureTextEx(font, l1, size1, 0);
+            Vector2 s2 = MeasureTextEx(font, l2, size2, 0);
+        
+            float x1 = pos.x + (tailleCase - s1.x) / 2;
+            float x2 = pos.x + (tailleCase - s2.x) / 2;
+        
+            float baseY = pos.y + (tailleCase - (s1.y + s2.y + 6)) / 2;
+        
+            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0, (Color){200,20,20,255});
+            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 6}, size2, 0, (Color){200,20,20,255});
+        
+            // numéro de la case
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+        // ------ CASE DEMINEUR FACILE (Case 3) ------
+        else if (i == 2) {
+            const char *txt = "DEMINEUR";
+            Color col = DARKBLUE; // facile → bleu
+
+            Vector2 s = MeasureTextEx(font, txt, 22, 0);
+            DrawTextEx(font, txt,
+                    (Vector2){pos.x + (tailleCase - s.x)/2,
+                                pos.y + (tailleCase - s.y)/2},
+                    22, 0, col);
+
+            DrawTextEx(font, TextFormat("%d", i),
+                    (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+
+        // ------ CASE DEMINEUR MOYEN (Case 12) ------
+        else if (i == 6) {
+            const char *txt = "DEMINEUR";
+            Color col = ORANGE; // moyen → orange
+
+            Vector2 s = MeasureTextEx(font, txt, 22, 0);
+            DrawTextEx(font, txt,
+                    (Vector2){pos.x + (tailleCase - s.x)/2,
+                                pos.y + (tailleCase - s.y)/2},
+                    22, 0, col);
+
+            DrawTextEx(font, TextFormat("%d", i),
+                    (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+
+        // ------ CASE DEMINEUR DIFFICILE (Case 16) ------
+        else if (i == 13) {
+            const char *txt = "DEMINEUR";
+            Color col = RED; // difficile → rouge
+
+            Vector2 s = MeasureTextEx(font, txt, 22, 0);
+            DrawTextEx(font, txt,
+                    (Vector2){pos.x + (tailleCase - s.x)/2,
+                                pos.y + (tailleCase - s.y)/2},
+                    22, 0, col);
+
+            DrawTextEx(font, TextFormat("%d", i),
+                    (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+
+
+        // ------ CASE SPÉCIALE 0 : DÉPART ------
+        else if (i == 0) {
+            const char *txt = "DEPART";
+            int size = 28;
+            Vector2 s = MeasureTextEx(font, txt, size, 0);
+
+            float x = pos.x + (tailleCase - s.x) / 2;
+            float y = pos.y + (tailleCase - s.y) / 2;
+
+            DrawTextEx(font, txt, (Vector2){x, y}, size, 0, (Color){0,120,0,255});
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+        // ------ CASE FINALE : ARRIVÉE (19) ------
+        else if (i == totalCases - 1) {
+            const char *txt = "ARRIVEE";
+            int size = 28;
+            Vector2 s = MeasureTextEx(font, txt, size, 0);
+
+            float x = pos.x + (tailleCase - s.x) / 2;
+            float y = pos.y + (tailleCase - s.y) / 2;
+
+            // texte bien visible en vert foncé
+            DrawTextEx(font, txt, (Vector2){x, y}, size, 0, (Color){0,80,0,255});
+
+            // garde le numéro 19 dans le coin comme les autres
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+        // ------ CASE NORMALE ------
+        else {
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+    }
+}
+
+// ============================================================
+// MAIN
+// ============================================================
+int main(void) {
+    bool shouldExit = false;
+    SetConfigFlags(FLAG_MSAA_4X_HINT);
+    InitWindow(1920, 1080, "Jeu de plateau");
+    InitAudioDevice();                 // Active le son
+    Music music = LoadMusicStream("All-is-fine.mp3");  // Charge la musique
+    PlayMusicStream(music);            // Lance la musique
+
+    SetExitKey(KEY_NULL); // ESC ne ferme pas la fenêtre
+    SetTargetFPS(60);
+    srand((unsigned)time(NULL));
+
+    Font font = LoadFontEx("Poppins-Medium.ttf", 256, 0, 0);
+    GenTextureMipmaps(&font.texture);
+    SetTextureFilter(font.texture, TEXTURE_FILTER_TRILINEAR);
+    
+    if (font.texture.id == 0) font = GetFontDefault();
+    
+    Font customFont = LoadFontEx("MerryChristmasFlake.ttf", 64, 0, 0);
+    GenTextureMipmaps(&customFont.texture);
+    SetTextureFilter(customFont.texture, TEXTURE_FILTER_TRILINEAR);
+    
+    GameState state = STATE_MENU;
+
+    Player player = (Player){0, 0, false, 0.0f};
+    int diceValue = 1;
+    int tricheValue = 1;   
+    int fakeRoll = 1;  
+    bool trapActive = false;
+    float trapTimer = 0.0f;
+    bool trapActive4 = false;
+    float trapTimer4 = 0.0f;
+    bool tpActive7 = false;
+    float tpTimer7 = 0.0f;
+    bool tpInvisible7 = false;
+    bool trapActive15 = false;
+    float trapTimer15 = 0.0f;
+    bool trapActive18 = false;
+    float trapTimer18 = 0.0f;
+    bool trapActive5 = false;
+    float trapTimer5 = 0.0f;
+
+
+
+    // Palette de Noël
+    Color bg1 = (Color){240, 240, 255, 255}; // Blanc neige
+    Color bg2 = (Color){200, 0, 0, 255};     // Rouge Noël
+    Color accent = (Color){0, 100, 0, 255};  // Vert sapin
+    Color accentLight = (Color){0, 150, 0, 255};
+    Color caseA = (Color){255, 255, 200, 255}; // Jaune pâle pour les cases
+    Color caseB = (Color){255, 220, 180, 255}; // Beige pour les cases
+
+    // Ajout d'éléments décoratifs de Noël
+    Texture2D snowflake = LoadTexture("snowflake.png"); // Flocon de neige
+    Texture2D tree = LoadTexture("tree.png");           // Sapin de Noël
+    Texture2D gift = LoadTexture("gift.png");           // Cadeau
+
+    // Ajout de la texture pour le pion Père Noël
+    Texture2D santa = LoadTexture("santa.jpg");
+
+    // Ajout de la texture pour le fond du plateau
+    Texture2D background = LoadTexture("Noelplateau.jpeg");
+    Texture2D principalBG = LoadTexture("principal.png");
+
+    //-----------------------------------------------------
+    // LAYOUT : Plateau centré dans la zone gauche
+    //-----------------------------------------------------
+
+    Rectangle sidePanel = (Rectangle){1320, 0, 600, 1080};  // panneau à droite
+
+    int tailleCase = 130;  
+    int totalCases = 20;   // 0 à 19
+
+    // d’après ton schéma col/row : 0..7 en X, 0..4 en Y
+    int maxCol = 7;
+    int maxRow = 4;
+
+    // dimensions réelles du plateau
+    int plateauWidth  = (maxCol + 1) * tailleCase;   // 8 cases
+    int plateauHeight = (maxRow + 1) * tailleCase;   // 5 cases
+
+    // zone disponible pour le plateau = largeur avant le panneau
+    int boardAreaWidth  = (int)sidePanel.x;    // 1320 px
+    int boardAreaHeight = 1080;                // full height
+
+    // offsets centrés
+    int offsetX = (boardAreaWidth  - plateauWidth)  / 2;
+    int offsetY = (boardAreaHeight - plateauHeight) / 2;
+
+    while (!WindowShouldClose()) {
+        // Gestion musique ON/OFF
+        if (musicEnabled) {
+            UpdateMusicStream(music);
+            if (!IsMusicStreamPlaying(music)) {
+                PlayMusicStream(music);
+            }
+        } else {
+            StopMusicStream(music);
+        }
+
+        BeginDrawing();
+        ClearBackground(bg1);
+
+        switch (state) {
+
+        // ============ MENU ============
+        case STATE_MENU: {
+            DrawTexturePro(
+                principalBG,
+                (Rectangle){0, 0, principalBG.width, principalBG.height},
+                (Rectangle){0, 0, 1920, 1080},
+                (Vector2){0, 0},
+                0,
+                WHITE
+            );
+//--------------------------------------------------------------
+// ✨ Guirlandes du sapin — version corrigée
+//--------------------------------------------------------------
+{
+    const int sapinX = 430;      // centre horizontal du sapin
+    const int sapinY = 150;      // haut du sapin
+    const int height = 730;      // hauteur visible
+    const int width  = 500;      // largeur max
+
+    const int lightsCount = 42;
+    static Vector2 lightPos[64];
+    static int lightColorIndex[64];
+    static bool initialized = false;
+
+    // ---- Palette LED ----
+    Color palette[] = {
+        {255, 240, 80, 255},   // jaune chaud
+        {255, 60, 60, 255},    // rouge
+        {60, 255, 90, 255},    // vert
+        {90, 140, 255, 255}    // bleu
+    };
+    int paletteCount = 4;
+
+    // ---------------------------------------------------
+    // Initialisation une seule fois
+    // ---------------------------------------------------
+    if (!initialized) {
+        initialized = true;
+
+        for (int i = 0; i < lightsCount; i++) {
+
+            float t = (float)i / (lightsCount - 1); // progression 0 → 1
+
+            // Largeur de la couche courante (triangle)
+            float rowWidth = width * t;
+            if (rowWidth < 20) rowWidth = 20;
+
+            float y = sapinY + t * height;
+            float x = sapinX - rowWidth/2 + (rand() % (int)rowWidth);
+
+            // ⛔ SUPPRESSION DES LED TROP BASSES (zone cadeau/tapis)
+            if (y > sapinY + height * 0.88f) {
+                // on remonte la LED automatiquement pour éviter les excès
+                y -= 60 + (rand() % 50);
+            }
+
+            lightPos[i] = (Vector2){x, y};
+            lightColorIndex[i] = rand() % paletteCount;
+        }
+    }
+
+    // ---------------------------------------------------
+    // Dessin animé
+    // ---------------------------------------------------
+    for (int i = 0; i < lightsCount; i++) {
+
+        float t = GetTime()*3.5f + i*0.35f;   // ⚡ scintillement + rapide
+        float intensity = 0.4f + 0.6f * (0.5f + 0.5f * sinf(t));
+
+        Color base = palette[lightColorIndex[i]];
+        Color glow = (Color){
+            base.r,
+            base.g,
+            base.b,
+            (unsigned char)(190 * intensity)
+        };
+
+        // Halo
+        DrawCircleV(lightPos[i], 8,
+            (Color){glow.r, glow.g, glow.b, (unsigned char)(70 * intensity)});
+
+        // LED
+        DrawCircleV(lightPos[i], 4, glow);
+    }
+}
+
+
+            const char *title = "Le Jeu de Noel";
+            int fontSize = 90;
+
+            Vector2 textSize = MeasureTextEx(customFont, title, fontSize, 0);
+            float posX = 1920/2 - textSize.x/2;
+
+            DrawTextEx(customFont, title, (Vector2){posX, 220}, fontSize, 0, accent);
+
+            if (DrawButton(font, "JOUER",   (Rectangle){820, 520, 280, 100},
+                           accent, accentLight, 50)) {
+                state = STATE_BOARD;
+            }
+
+            if (DrawButton(font, "OPTIONS", (Rectangle){820, 650, 280, 100},
+                           (Color){200,100,40,255}, (Color){240,130,60,255}, 50)) {
+                state = STATE_OPTIONS;
+            }
+
+            if (DrawButton(font, "QUITTER", (Rectangle){820, 780, 280, 100},
+                           (Color){160,40,30,255}, (Color){200,60,40,255}, 50)) {
+                            shouldExit = true;
+            }
+        } break;
+
+        // ============ OPTIONS ============
+        case STATE_OPTIONS: {
+            DrawRectangleGradientV(0, 0, 1920, 1080, bg1, bg2);
+            const char *optTitle = "Options";
+            int optSize = 80;
+            Vector2 optS = MeasureTextEx(customFont, optTitle, optSize, 0);
+
+            // centrer au milieu de l'écran
+            float optX = 1920/2 - optS.x/2;
+
+            DrawTextEx(customFont, optTitle, (Vector2){optX, 250}, optSize, 0, accent);
+
+
+            // Bouton musique ON/OFF
+            Rectangle musicBtn = (Rectangle){820, 460, 280, 100};
+            const char *musicLabel = musicEnabled ? "Musique : ON" : "Musique : OFF";
+
+            if (DrawButton(font, musicLabel, musicBtn,
+                           (Color){200,100,40,255}, (Color){240,130,60,255}, 40)) {
+                musicEnabled = !musicEnabled;
+            }
+
+            // Bouton retour
+            if (DrawButton(font, "RETOUR",
+                           (Rectangle){820, 700, 280, 100},
+                           accent, accentLight, 50)) {
+                state = STATE_MENU;
+            }
+        } break;
+
+        // ============ PLATEAU ============
+        case STATE_BOARD: {
+            // Dessin du fond du plateau
+            DrawTextureEx(background, (Vector2){0, 0}, 0.0f, 1.0f, WHITE);
+
+            // Dessin des flocons de neige en arrière-plan (décor random)
+            for (int i = 0; i < 10; i++) {
+                DrawTexture(snowflake, rand() % 1920, rand() % 1080, WHITE);
+            }
+
+            // plateau gauche
+            Draw3DBoard(font, totalCases, offsetX, offsetY, tailleCase,
+                caseA, caseB, accent, accent);
+    
+
+            // Ajout de sapins autour du plateau
+            for (int i = 0; i < 4; i++) {
+                DrawTexture(tree, offsetX - 50 + i * 500, offsetY - 100, WHITE);
+            }
+
+            // Ajout de cadeaux sur certaines cases
+            Vector2 giftPos = CaseToPos(3, offsetX, offsetY, tailleCase);
+            DrawTexture(gift, giftPos.x + 20, giftPos.y + 20, WHITE);
+
+            // pion (remplacement par l'image de Père Noël avec ajustement de taille)
+            float scale = (float)tailleCase / santa.width;
+            Vector2 pPos = CaseToPos(player.pos, offsetX, offsetY, tailleCase);
+
+            // Petit saut quand le pion se déplace
+            float jumpOffset = 0.0f;
+            if (player.isMoving) {
+                float t = player.animTimer;
+                if (t < 1.0f) {
+                    float s = sinf(t * 3.1415926f);
+                    jumpOffset = -s * (tailleCase * 0.25f);
+                }
+            }
+
+            if (!tpInvisible7) {
+                DrawTextureEx(
+                    santa,
+                    (Vector2){
+                        pPos.x + (tailleCase - santa.width * scale) / 2,
+                        pPos.y + (tailleCase - santa.height * scale) / 2 + jumpOffset
+                    },
+                    0.0f,
+                    scale,
+                    WHITE
+                );
+            }
+            
+
+            // panneau latéral droit — UI propre
+            DrawRectangleGradientV(sidePanel.x, sidePanel.y, sidePanel.width, sidePanel.height,
+                                   (Color){242,236,228,255}, (Color){224,210,196,255});
+            DrawLine(sidePanel.x, 0, sidePanel.x, 1080, Fade(BLACK, 0.25f));
+
+                        // ----- TITRE TABLEAU DE BORD -----
+            // texte centré horizontalement
+            const char *dashTitle = "TABLEAU DE BORD";
+            float dashSize = 42;
+            Vector2 dashMeasure = MeasureTextEx(font, dashTitle, dashSize, 0);
+
+            // centre dans le panneau
+            float dashX = sidePanel.x + (sidePanel.width - dashMeasure.x) / 2;
+            float dashY = 80;
+
+            DrawTextEx(font, dashTitle, (Vector2){dashX, dashY}, dashSize, 0, accent);
+
+            // ---- Soulignement décoratif (ligne verte + ligne blanche) ----
+            float underlineWidth = dashMeasure.x + 20;    // petite marge
+            float underlineX = sidePanel.x + (sidePanel.width - underlineWidth) / 2;
+            float underlineY = dashY + dashMeasure.y + 6;
+
+            DrawRectangle(underlineX, underlineY, underlineWidth, 4, (Color){0, 120, 0, 255});
+            DrawRectangle(underlineX, underlineY + 4, underlineWidth, 2, WHITE);
+
+            // ----- OBJECTIF (centré aussi) -----
+            const char *obj = "Objectif : atteint la case 19 !";
+            float objSize = 30;
+            Vector2 objMeasure = MeasureTextEx(font, obj, objSize, 0);
+
+            float objX = sidePanel.x + (sidePanel.width - objMeasure.x) / 2;
+            float objY = underlineY + 40;
+
+            DrawTextEx(font, obj, (Vector2){objX, objY}, objSize, 0, accent);
+
+            // Déplacement + arrivée ce frame (avance OU recule vers la cible)
+            bool arrived = false;
+            if (player.isMoving) {
+                player.animTimer += GetFrameTime() * 3.0f;
+                if (player.animTimer >= 1.0f) {
+                    player.animTimer = 0.0f;
+
+                    if (player.pos == player.cible) {
+                        player.isMoving = false;
+                        arrived = true;
+                    } else {
+                        if (player.pos < player.cible && player.pos < totalCases - 1) {
+                            player.pos++;
+                        } else if (player.pos > player.cible && player.pos > 0) {
+                            player.pos--;
+                        }
+
+                        if (player.pos == player.cible) {
+                            player.isMoving = false;
+                            arrived = true;
+                        }
+                    }
+                }
+            }
+            // Téléportation case 7 → 13
+            if (!player.isMoving && player.pos == 7) {
+                HandleTeleport7(&player, totalCases, font,
+                                &tpActive7, &tpTimer7, &tpInvisible7);
+            }
+
+            // Piège case 9 : recule
+            if (!player.isMoving && player.pos == 9) {
+                HandleCaseNine(&player, totalCases, font, &trapActive, &trapTimer);
+            }
+
+            // ---- CASE 5 : RETOUR AU DEPART ----
+            if (!player.isMoving && player.pos == 5) {
+                HandleCaseFive(&player, totalCases, font, &trapActive5, &trapTimer5);
+            }
+
+            // Case 15 → avance de 4 cases
+            if (!player.isMoving && player.pos == 15) {
+                HandleCaseFifteen(&player, totalCases, font, &trapActive15, &trapTimer15);
+            }
+            // Case 4 : avance de 2 cases
+            if (!player.isMoving && player.pos == 4) {
+                HandleCaseFour(&player, totalCases, font, &trapActive4, &trapTimer4);
+            }
+
+            // Piège case 18 : retour départ
+            if (!player.isMoving && player.pos == 18) {
+                HandleCaseEighteen(&player, totalCases, font, &trapActive18, &trapTimer18);
+            }
+
+            // Arrivée sur une case Sudoku → lancer le jeu (uniquement SUR ARRIVÉE)
+            if (arrived &&
+                (player.pos == 1 || player.pos == 10 || player.pos == 17)) {
+
+                // Choisir le niveau selon la case
+                if (player.pos == 1)  SudokuSetLevel(1);   // Facile
+                if (player.pos == 10) SudokuSetLevel(2);   // Moyen
+                if (player.pos == 17) SudokuSetLevel(3);   // Difficile
+
+                EndDrawing();
+                StartSudoku(font);   // lance le mini-jeu
+
+                // on revient au plateau sans relancer automatiquement
+                continue;
+            }
+
+
+            // Arrivée case 8 ou 14 → Morpion
+            if (arrived && (player.pos == 8 || player.pos == 14)) {
+                EndDrawing();
+                system("morpion.exe");
+                continue;
+            }
+            
+            // Arrivée sur une case PENDU (3, 11, 16)
+            if (arrived && (player.pos == 3 || player.pos == 11 || player.pos == 16)) {
+
+                EndDrawing();
+                system("pendu.exe");  
+                continue;             
+            }
+
+            // Arrivée sur une case DEMINEUR → lancer le bon niveau
+            if (arrived && (player.pos == 2 || player.pos == 6 || player.pos == 13)) {
+
+                int level = 1;
+                if (player.pos == 6) level = 2;
+                if (player.pos == 13) level = 3;
+
+                EndDrawing();
+
+                int won = StartDemineur(level);
+
+                if (won != 1) {
+                    // Le joueur a perdu → recule (ou autre logique)
+                    player.pos -= 1;
+                    if (player.pos < 0) player.pos = 0;
+                }
+
+                continue; // IMPORTANT !
+            }
+
+            // Victoire
+            if (!player.isMoving && player.pos == totalCases - 1) {
+                state = STATE_WIN;
+            }
+
+            // Dés affichés uniquement si pas de Sudoku en cours
+            {
+
+            int diceY = sidePanel.height - 250;
+            Vector2 mouse = GetMousePosition();
+            
+            // -----------------------------------------------------------
+            // VALEUR TRUQUEE — joli et bien centré au-dessus du dé truqué
+            // -----------------------------------------------------------
+            char txtTriche[64];
+            snprintf(txtTriche, sizeof(txtTriche), "Valeur truquee : %d", tricheValue);
+
+            int textSize = 32;
+            Vector2 textMeasure = MeasureTextEx(font, txtTriche, textSize, 0);
+
+            // Position du texte = centré sur le dé truqué
+            float tricheX = sidePanel.x + 80 + 180 + 30 + (180 / 2) - (textMeasure.x / 2);
+            float tricheY = diceY - 60;
+
+            // Ombre
+            DrawTextEx(font, txtTriche, (Vector2){tricheX + 2, tricheY + 2}, textSize, 0, (Color){0,0,0,80});
+
+            // Texte principal
+            DrawTextEx(font, txtTriche, (Vector2){tricheX, tricheY}, textSize, 0, (Color){20,80,20,255});
+
+            // Clique droit → changer valeur
+            if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
+                tricheValue++;
+                if (tricheValue > 19) tricheValue = 1;
+            }
+
+
+                // Dé normal
+                Rectangle diceRect = (Rectangle){
+                    sidePanel.x + 80,
+                    diceY,
+                    180,
+                    180
+                };
+
+                DrawRectangleRounded(diceRect, 0.35f, 8, WHITE);
+                DrawRectangleRoundedLines(diceRect, 0.35f, 8, accent);
+
+                if (CheckCollisionPointRec(mouse, diceRect)) {
+                    DrawDiceHighlight(diceRect);
+                }
+
+                DrawDiceDots(diceRect, diceValue, accentLight);
+
+                const char *label1 = "De normal";
+                Vector2 s1 = MeasureTextEx(font, label1, 26, 0);
+                DrawTextEx(font, label1,
+                           (Vector2){
+                               diceRect.x + diceRect.width/2 - s1.x/2,
+                               diceRect.y + diceRect.height - 35
+                           },
+                           26, 0, DARKGRAY);
+
+                if (CheckCollisionPointRec(mouse, diceRect) &&
+                    IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+
+                    if (player.pos != totalCases - 1) {
+                        diceValue = LaunchDice3D(font);
+                        player.cible = player.pos + diceValue;
+                        if (player.cible >= totalCases)
+                            player.cible = totalCases - 1;
+                        player.isMoving = true;
+                    }
+                }
+
+                // Dé truqué
+                Rectangle fixedDiceRect = (Rectangle){
+                    sidePanel.x + 80 + 180 + 30,
+                    diceY,
+                    180,
+                    180
+                };
+
+                DrawRectangleRounded(fixedDiceRect, 0.35f, 8, WHITE);
+                DrawRectangleRoundedLines(fixedDiceRect, 0.35f, 8, accent);
+
+                if (CheckCollisionPointRec(mouse, fixedDiceRect)) {
+                    DrawDiceHighlight(fixedDiceRect);
+                }
+
+                DrawDiceDots(fixedDiceRect, 1, accentLight);
+
+                const char *label2 = "De truque";
+                Vector2 s2 = MeasureTextEx(font, label2, 26, 0);
+                DrawTextEx(font, label2,
+                           (Vector2){
+                               fixedDiceRect.x + fixedDiceRect.width/2 - s2.x/2,
+                               fixedDiceRect.y + fixedDiceRect.height - 35
+                           },
+                           26, 0, DARKGRAY);
+
+                           if (CheckCollisionPointRec(mouse, fixedDiceRect) &&
+                            IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+
+                            if (player.pos != totalCases - 1) {
+
+                                fakeRoll = tricheValue;               // ← UTILISÉ SEULEMENT POUR LE MOUVEMENT
+                                player.cible = player.pos + fakeRoll;
+
+                                if (player.cible >= totalCases)
+                                    player.cible = totalCases - 1;
+
+                                player.isMoving = true;
+                            }
+                        }
+
+                       
+            }
+
+        } break;
+
+        // ============ ÉCRAN DE VICTOIRE ============
+        case STATE_WIN: {
+            DrawRectangleGradientV(0, 0, 1920, 1080,
+                                   (Color){255,220,160,255}, (Color){255,170,100,255});
+            DrawTextEx(customFont, "BRAVO !", (Vector2){800, 380}, 110, 0, accent);
+            DrawTextEx(font, "Tu as atteint la derniere case !",
+                       (Vector2){640, 540}, 42, 0, DARKGRAY);
+
+            if (DrawButton(font, "RETOUR MENU",
+                           (Rectangle){820, 700, 280, 100},
+                           accent, accentLight, 50)) {
+
+                state = STATE_MENU;
+                SudokuReset();
+                player = (Player){0,0,false, 0.0f};
+                diceValue = 1;
+            }
+        } break;
+
+        } // fin switch(state)
+
+        EndDrawing();
+        if (shouldExit) break;
+    } // fin while
+
+    UnloadTexture(snowflake);
+    UnloadTexture(tree);
+    UnloadTexture(gift);
+    UnloadTexture(santa);
+    UnloadTexture(background);
+    UnloadTexture(principalBG);
+    UnloadFont(customFont);
+    UnloadMusicStream(music);
+    CloseAudioDevice();
+    CloseWindow();
+    return 0;
+}
