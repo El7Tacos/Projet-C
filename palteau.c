@@ -18,6 +18,49 @@
 #include "demineur.h"
 #include "five.h"
 
+bool DrawFancyButton(Font font, const char *text, Rectangle rec) {
+
+    Vector2 mouse = GetMousePosition();
+    bool hover = CheckCollisionPointRec(mouse, rec);
+
+    Color redTop    = (Color){230, 50, 50, 255};
+    Color redBottom = (Color){150, 10, 10, 255};
+    Color gold      = (Color){255, 220, 120, 255};
+
+    // Dégradé rouge
+    DrawRectangleGradientV(rec.x, rec.y, rec.width, rec.height, redTop, redBottom);
+
+    // Contour doré
+    DrawRectangleRoundedLines(rec, 0.25f, 14, gold);
+
+    // Glow au survol
+    if (hover) {
+        DrawRectangleRounded(rec, 0.25f, 14, (Color){255,255,255,30});
+    }
+
+    // Ombre légèrement en dessous
+    DrawRectangleRounded(
+        (Rectangle){rec.x, rec.y + 5, rec.width, rec.height},
+        0.25f, 14, (Color){0,0,0,50}
+    );
+
+    // Texte centré
+    int size = rec.height * 0.55f;   // plus lisible pour Santa Sleigh Full
+    if (size < 40) size = 40;        // taille minimale pour éviter le fallback
+    Vector2 s = MeasureTextEx(font, text, size, 0);
+
+    DrawTextEx(
+        font,
+        text,
+        (Vector2){ rec.x + rec.width/2 - s.x/2, rec.y + rec.height/2 - s.y/2 },
+        size,
+        0,
+        gold
+    );
+
+    return hover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
+}
+
 #define CASES_PAR_COTE 6
 
 typedef enum { STATE_MENU, STATE_OPTIONS, STATE_BOARD, STATE_WIN } GameState;
@@ -506,7 +549,11 @@ int main(void) {
     Font customFont = LoadFontEx("MerryChristmasFlake.ttf", 64, 0, 0);
     GenTextureMipmaps(&customFont.texture);
     SetTextureFilter(customFont.texture, TEXTURE_FILTER_TRILINEAR);
-    
+
+    Font santaFont = LoadFontEx("Candcu_.ttf", 140, 0, 0);
+    GenTextureMipmaps(&santaFont.texture);
+    SetTextureFilter(santaFont.texture, TEXTURE_FILTER_TRILINEAR);
+
     GameState state = STATE_MENU;
 
     Player player = (Player){0, 0, false, 0.0f};
@@ -527,8 +574,6 @@ int main(void) {
     bool trapActive5 = false;
     float trapTimer5 = 0.0f;
 
-
-
     // Palette de Noël
     Color bg1 = (Color){240, 240, 255, 255}; // Blanc neige
     Color bg2 = (Color){200, 0, 0, 255};     // Rouge Noël
@@ -548,6 +593,8 @@ int main(void) {
     // Ajout de la texture pour le fond du plateau
     Texture2D background = LoadTexture("fond2.jpg");
     Texture2D principalBG = LoadTexture("principal.png");
+    Texture2D bannerNoel = LoadTexture("perenoel.png");
+
 
     //-----------------------------------------------------
     // LAYOUT : Plateau centré dans la zone gauche
@@ -675,30 +722,46 @@ int main(void) {
         DrawCircleV(lightPos[i], 4, glow);
     }
 }
+            // --- AFFICHAGE DE LA BANNIÈRE DE NOËL ---
+            float scaleBanner = 0.35f;
+
+            float bannerW = bannerNoel.width * scaleBanner;
+            float bannerH = bannerNoel.height * scaleBanner;
+
+            float offsetX = -20;  // AJUSTE ICI pour centrer nickel
+
+            float bannerX = 1920/2 - bannerW/2 + offsetX;
+            float bannerY = 40;
+
+            DrawTextureEx(
+                bannerNoel,
+                (Vector2){ bannerX, bannerY },
+                0.0f,
+                scaleBanner,
+                WHITE
+            );
 
 
-            const char *title = "Le Jeu de Noel";
-            int fontSize = 90;
+            // --- Nouveaux boutons stylés ---
+            Rectangle btnPlay  = (Rectangle){ 800, 500, 320, 90 };
+            Rectangle btnOpt   = (Rectangle){ 800, 620, 320, 90 };
+            Rectangle btnQuit  = (Rectangle){ 800, 740, 320, 90 };
 
-            Vector2 textSize = MeasureTextEx(customFont, title, fontSize, 0);
-            float posX = 1920/2 - textSize.x/2;
-
-            DrawTextEx(customFont, title, (Vector2){posX, 220}, fontSize, 0, accent);
-
-            if (DrawButton(font, "JOUER",   (Rectangle){820, 520, 280, 100},
-                           accent, accentLight, 50)) {
+            // Bouton JOUER
+            if (DrawFancyButton(santaFont, "JOUER", btnPlay)) {
                 state = STATE_BOARD;
             }
 
-            if (DrawButton(font, "OPTIONS", (Rectangle){820, 650, 280, 100},
-                           (Color){200,100,40,255}, (Color){240,130,60,255}, 50)) {
+            // Bouton OPTIONS
+            if (DrawFancyButton(santaFont, "OPTIONS", btnOpt)) {
                 state = STATE_OPTIONS;
             }
 
-            if (DrawButton(font, "QUITTER", (Rectangle){820, 780, 280, 100},
-                           (Color){160,40,30,255}, (Color){200,60,40,255}, 50)) {
-                            shouldExit = true;
+            // Bouton QUITTER
+            if (DrawFancyButton(santaFont, "QUITTER", btnQuit)) {
+                shouldExit = true;
             }
+
         } break;
 
         // ============ OPTIONS ============
