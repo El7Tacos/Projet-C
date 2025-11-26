@@ -186,8 +186,22 @@ int LaunchDice3D(Font font)
     float camAngle = 0.0f;
     float camZoom = 4.0f;
 
-    // NEIGE - initialisation avec zone de 5x5
+    // NEIGE - initialisation 
     InitSnowflakes(5.0f);
+
+    // Polices de Noël
+    Font fontNoel = LoadFontEx("MerryChristmasFlake.ttf", 80, 0, 0);
+    GenTextureMipmaps(&fontNoel.texture);
+    SetTextureFilter(fontNoel.texture, TEXTURE_FILTER_BILINEAR);
+
+    Font fontWin = LoadFontEx("SantasSleighFull Bold.ttf", 80, 0, 0);
+    GenTextureMipmaps(&fontWin.texture);
+    SetTextureFilter(fontWin.texture, TEXTURE_FILTER_BILINEAR);
+
+    Font fontReplay = LoadFontEx("SantasSleighFull.ttf", 50, 0, 0);
+    GenTextureMipmaps(&fontReplay.texture);
+    SetTextureFilter(fontReplay.texture, TEXTURE_FILTER_BILINEAR);
+
 
     while (!WindowShouldClose()) {
         float dt = GetFrameTime();
@@ -279,13 +293,37 @@ int LaunchDice3D(Font font)
         EndMode3D();
 
         // Texte
-        DrawTextEx(font, "LANCER DE DE", (Vector2){440,40}, 40, 0, BROWN);
+        DrawTextEx(fontNoel, "Lancer de DE", (Vector2){200,40}, 80, 0, RED);
         if (dice.rolling) {
             int alpha = 150 + (int)(105 * sinf(GetTime()*4.0f));
-            DrawTextEx(font, "Le de roule...", (Vector2){540,720}, 30, 0, (Color){80,80,80,alpha});
+            DrawTextEx(fontWin, "Le de roule...", (Vector2){900,950}, 50, 0, (Color){80,80,80,alpha});
         } else {
-            DrawTextEx(font, TextFormat("Resultat : %d (ENTREE ou clic pour revenir)", finalResult),
-                       (Vector2){260,720}, 30, 0, DARKBROWN);
+        // Ligne 1 (résultat)
+        const char* line1 = TextFormat("Resultat : %d", finalResult);
+        int fontSize1 = 80;                     // Taille différente
+        Color color1 = DARKGREEN;                    // Couleur différente
+
+        // Ligne 2 (instructions)
+        const char* line2 = "cliquez sur ENTRER pour continuer";
+        int fontSize2 = 40;                     // Taille différente
+        Color color2 = DARKBLUE;                // Couleur différente
+
+        // Mesurer largeur des deux lignes
+        Vector2 size1 = MeasureTextEx(fontWin, line1, fontSize1, 0);
+        Vector2 size2 = MeasureTextEx(fontWin, line2, fontSize2, 0);
+
+        // Centrage horizontal
+        float x1 = (GetScreenWidth() - size1.x) / 2.0f;
+        float x2 = (GetScreenWidth() - size2.x) / 2.0f;
+
+        // Positions verticales
+        float y1 = 860;
+        float y2 = 940;
+
+        // Dessin des deux lignes
+        DrawTextEx(fontWin, line1, (Vector2){x1, y1}, fontSize1, 0, color1);
+        DrawTextEx(fontWin, line2, (Vector2){x2, y2}, fontSize2, 0, color2);
+        
         }
 
         EndDrawing();
