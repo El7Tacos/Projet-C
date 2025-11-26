@@ -1,6 +1,4 @@
 // gcc palteau.c dice3d.c nine.c four.c five.c teleport7.c fifteen.c eighteen.c sudoku.c demineurgraphique.c -Iinclude -Llib -lraylib -lopengl32 -lgdi32 -lwinmm -o plateau.exe
-//coucou elia !
-// salut gab ! 
 
 #include <math.h>
 #include "raylib.h"
@@ -190,7 +188,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
         }
         else if (i == 1) {
             const char *txt = "SUDOKU";
-            Color col = DARKBLUE; // facile → bleu
+            Color col = RED; // facile → bleu
         
             Vector2 s = MeasureTextEx(font, txt, 24, 0);
             DrawTextEx(font, txt,
@@ -202,7 +200,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
         }
         else if (i == 3 || i == 11 || i == 16) {
             const char *txt = "PENDU";
-            Color col = DARKBLUE;
+            Color col = DARKGREEN;
         
             Vector2 s = MeasureTextEx(font, txt, 24, 0);
         
@@ -217,20 +215,8 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
                        28, 0, accent);
         }
         else if (i == 5) {
-            const char *txt = "RETOUR DEPART";
-            Color col = RED; // couleur au choix
-
-            Vector2 s = MeasureTextEx(font, txt, 24, 0);
-            DrawTextEx(font, txt,
-                       (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},
-                       24, 0, col);
-
-            DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
-        }
-        else if (i == 4) {
-            const char *l1 = "BONUS";
-            const char *l2 = "ou... MALUS ?";
+            const char *l1 = "RETOUR";
+            const char *l2 = "DEPART !";
 
             int size1 = 28;
             int size2 = 22;
@@ -244,10 +230,35 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             float baseY = pos.y + (tailleCase - (s1.y + s2.y + 4)) / 2;
 
             DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0,
-                       (Color){0,150,0,255});    // vert bonus
+                        (BLACK));    // vert bonus
 
             DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 4}, size2, 0,
-                       (Color){0,150,0,255});
+                        (BLACK));
+
+            // numéro de la case (comme toutes les autres)
+            DrawTextEx(font, TextFormat("%d", i),
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+        }
+        else if (i == 4) {
+            const char *l1 = "CADEAU";
+            const char *l2 = "DU LUTIN !";
+
+            int size1 = 28;
+            int size2 = 22;
+
+            Vector2 s1 = MeasureTextEx(font, l1, size1, 0);
+            Vector2 s2 = MeasureTextEx(font, l2, size2, 0);
+
+            float x1 = pos.x + (tailleCase - s1.x) / 2;
+            float x2 = pos.x + (tailleCase - s2.x) / 2;
+
+            float baseY = pos.y + (tailleCase - (s1.y + s2.y + 4)) / 2;
+
+            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0,
+                        (BLACK));    // vert bonus
+
+            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 4}, size2, 0,
+                        (BLACK));
 
             // numéro de la case (comme toutes les autres)
             DrawTextEx(font, TextFormat("%d", i),
@@ -267,8 +278,8 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             float x2 = pos.x + (tailleCase - s2.x)/2;
             float baseY = pos.y + (tailleCase - (s1.y + s2.y + 4)) / 2;
         
-            DrawTextEx(font, txt1, (Vector2){x1, baseY}, size1, 0, (Color){0,120,200,255});
-            DrawTextEx(font, txt2, (Vector2){x2, baseY + s1.y + 4}, size2, 0, (Color){0,120,200,255});
+            DrawTextEx(font, txt1, (Vector2){x1, baseY}, size1, 0, (BLACK));
+            DrawTextEx(font, txt2, (Vector2){x2, baseY + s1.y + 4}, size2, 0, (BLACK));
         
             DrawTextEx(font, TextFormat("%d", i),
                        (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
@@ -303,7 +314,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
         // ------ CASE SPÉCIALE 10 : SUDOKU ------
         else if (i == 10) {
             const char *txt = "SUDOKU";
-            Color col = ORANGE; // moyen → orange
+            Color col = RED; // moyen → orange
         
             Vector2 s = MeasureTextEx(font, txt, 24, 0);
             DrawTextEx(font, txt,
@@ -327,8 +338,8 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             float x2 = pos.x + (tailleCase - s2.x)/2;
             float baseY = pos.y + (tailleCase - (s1.y + s2.y + 4)) / 2;
         
-            DrawTextEx(font, txt1, (Vector2){x1, baseY}, size1, 0, (Color){0,120,200,255});
-            DrawTextEx(font, txt2, (Vector2){x2, baseY + s1.y + 4}, size2, 0, (Color){0,120,200,255});
+            DrawTextEx(font, txt1, (Vector2){x1, baseY}, size1, 0, (BLACK));
+            DrawTextEx(font, txt2, (Vector2){x2, baseY + s1.y + 4}, size2, 0, (BLACK));
         
             DrawTextEx(font, TextFormat("%d", i),
                        (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
@@ -347,8 +358,8 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             float x2 = pos.x + (tailleCase - s2.x) / 2;
             float baseY = pos.y + (tailleCase - (s1.y + s2.y + 6)) / 2;
         
-            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0, (Color){0,120,200,255});
-            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 6}, size2, 0, (Color){0,120,200,255});
+            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0, (BLACK));
+            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 6}, size2, 0, (BLACK));
         
             DrawTextEx(font, TextFormat("%d", i),
                        (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
@@ -356,7 +367,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
         
         else if (i == 17) {
             const char *txt = "SUDOKU";
-            Color col = (Color){180,40,40,255}; // difficile → rouge
+            Color col = RED; // difficile → rouge
         
             Vector2 s = MeasureTextEx(font, txt, 24, 0);
             DrawTextEx(font, txt,
@@ -381,8 +392,8 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
         
             float baseY = pos.y + (tailleCase - (s1.y + s2.y + 6)) / 2;
         
-            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0, (Color){200,20,20,255});
-            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 6}, size2, 0, (Color){200,20,20,255});
+            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0, (BLACK));
+            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 6}, size2, 0, (BLACK));
         
             // numéro de la case
             DrawTextEx(font, TextFormat("%d", i),
@@ -406,7 +417,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
         // ------ CASE DEMINEUR MOYEN (Case 12) ------
         else if (i == 6) {
             const char *txt = "DEMINEUR";
-            Color col = ORANGE; // moyen → orange
+            Color col = DARKBLUE; // moyen → orange
 
             Vector2 s = MeasureTextEx(font, txt, 22, 0);
             DrawTextEx(font, txt,
@@ -421,7 +432,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
         // ------ CASE DEMINEUR DIFFICILE (Case 16) ------
         else if (i == 13) {
             const char *txt = "DEMINEUR";
-            Color col = RED; // difficile → rouge
+            Color col = DARKBLUE;
 
             Vector2 s = MeasureTextEx(font, txt, 22, 0);
             DrawTextEx(font, txt,
@@ -443,7 +454,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             float x = pos.x + (tailleCase - s.x) / 2;
             float y = pos.y + (tailleCase - s.y) / 2;
 
-            DrawTextEx(font, txt, (Vector2){x, y}, size, 0, (Color){0,120,0,255});
+            DrawTextEx(font, txt, (Vector2){x, y}, size, 0, (MAGENTA));
             DrawTextEx(font, TextFormat("%d", i),
                        (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
         }
@@ -457,7 +468,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             float y = pos.y + (tailleCase - s.y) / 2;
 
             // texte bien visible en vert foncé
-            DrawTextEx(font, txt, (Vector2){x, y}, size, 0, (Color){0,80,0,255});
+            DrawTextEx(font, txt, (Vector2){x, y}, size, 0, (MAGENTA));
 
             // garde le numéro 19 dans le coin comme les autres
             DrawTextEx(font, TextFormat("%d", i),
@@ -535,7 +546,7 @@ int main(void) {
     Texture2D santa = LoadTexture("santa.jpg");
 
     // Ajout de la texture pour le fond du plateau
-    Texture2D background = LoadTexture("Noelplateau.jpeg");
+    Texture2D background = LoadTexture("fond2.jpg");
     Texture2D principalBG = LoadTexture("principal.png");
 
     //-----------------------------------------------------
@@ -772,10 +783,22 @@ int main(void) {
             }
             
 
-            // panneau latéral droit — UI propre
-            DrawRectangleGradientV(sidePanel.x, sidePanel.y, sidePanel.width, sidePanel.height,
-                                   (Color){242,236,228,255}, (Color){224,210,196,255});
-            DrawLine(sidePanel.x, 0, sidePanel.x, 1080, Fade(BLACK, 0.25f));
+            // --- Panneau latéral en verre dépoli (glassmorphism) ---
+            Color glass = (Color){255,255,255,160};  // semi transparent
+            DrawRectangleRounded(
+                (Rectangle){sidePanel.x, sidePanel.y, sidePanel.width, sidePanel.height},
+                0.08f, 20, glass
+            );
+
+            // Contour lumineux
+            DrawRectangleRoundedLines(
+                (Rectangle){sidePanel.x, sidePanel.y, sidePanel.width, sidePanel.height},
+                0.08f, 20, (Color){255,255,255,200}
+            );
+
+            // Petite ombre à gauche
+            DrawRectangle(sidePanel.x - 8, sidePanel.y, 8, sidePanel.height, (Color){0,0,0,50});
+
 
                         // ----- TITRE TABLEAU DE BORD -----
             // texte centré horizontalement
@@ -797,15 +820,38 @@ int main(void) {
             DrawRectangle(underlineX, underlineY, underlineWidth, 4, (Color){0, 120, 0, 255});
             DrawRectangle(underlineX, underlineY + 4, underlineWidth, 2, WHITE);
 
-            // ----- OBJECTIF (centré aussi) -----
-            const char *obj = "Objectif : atteint la case 19 !";
+            // ----- Carte OBJECTIF -----
+            const char *obj = "Objectif : atteindre la case 19 !";
+
+            // Taille du texte
             float objSize = 30;
             Vector2 objMeasure = MeasureTextEx(font, obj, objSize, 0);
 
-            float objX = sidePanel.x + (sidePanel.width - objMeasure.x) / 2;
-            float objY = underlineY + 40;
+            // Position de la carte
+            Rectangle cardObj = {
+                sidePanel.x + 40,
+                underlineY + 25,
+                sidePanel.width - 80,
+                120
+            };
 
+            // Ombre de la carte
+            DrawRectangleRounded(cardObj, 0.15f, 12, (Color){0,0,0,40});
+
+            // Fond de la carte
+            DrawRectangleRounded(
+                (Rectangle){cardObj.x, cardObj.y, cardObj.width, cardObj.height},
+                0.15f, 12,
+                (Color){255,255,255,210}
+            );
+
+            // Position du texte au centre de la carte
+            float objX = cardObj.x + (cardObj.width - objMeasure.x) / 2;
+            float objY = cardObj.y + (cardObj.height - objMeasure.y) / 2;
+
+            // Texte objectif
             DrawTextEx(font, obj, (Vector2){objX, objY}, objSize, 0, accent);
+
 
             // Déplacement + arrivée ce frame (avance OU recule vers la cible)
             bool arrived = false;
