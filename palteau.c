@@ -1,5 +1,6 @@
 // gcc palteau.c dice3d.c nine.c four.c five.c teleport7.c fifteen.c eighteen.c sudoku.c demineurgraphique.c -Iinclude -Llib -lraylib -lopengl32 -lgdi32 -lwinmm -o plateau.exe
 //coucou elia !
+// salut gab ! 
 
 #include <math.h>
 #include "raylib.h"
