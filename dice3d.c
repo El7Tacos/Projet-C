@@ -256,15 +256,11 @@ while (!WindowShouldClose()) {
 
     // --- Rendu ---
     BeginDrawing();
-    ClearBackground((Color){230,210,180,255});
+    ClearBackground((Color){27,41,76,255});
     BeginMode3D(camera);
 
-    // Sol + murs
-    DrawCube((Vector3){0, -0.51f, 0}, 12.0f, 0.1f, 12.0f, (Color){170,120,70,255});
-    Color wall = (Color){200,180,160,255};
-    DrawCube((Vector3){0,2.5f,-6}, 12,5,0.2f, wall);
-    DrawCube((Vector3){-6,2.5f,0}, 0.2f,5,12, wall);
-    DrawCube((Vector3){6,2.5f,0}, 0.2f,5,12, wall);
+    // Sol 
+    DrawCube((Vector3){0, -0.51f, 0}, 12.0f, 0.1f, 12.0f, (Color){230, 240, 255, 255});
 
     // Ombre douce
     DrawCircle3D((Vector3){dice.position.x,-0.49f,dice.position.z}, 0.6f,
