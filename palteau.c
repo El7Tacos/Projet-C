@@ -581,6 +581,9 @@ int main(void) {
     // Ajout de la texture pour le pion Père Noël
     Texture2D santa = LoadTexture("santa.jpg");
 
+    // Ajout du traineau de fin
+    Texture2D traineau = LoadTexture("traineau.png");
+
     // Ajout de la texture pour le fond du plateau
     Texture2D background = LoadTexture("fond2.jpg");
     Texture2D principalBG = LoadTexture("principal.png");
@@ -809,7 +812,12 @@ int main(void) {
             Vector2 giftPos = CaseToPos(3, offsetX, offsetY, tailleCase);
             DrawTexture(gift, giftPos.x + 20, giftPos.y + 20, WHITE);
 
-            // pion (remplacement par l'image de Père Noël avec ajustement de taille)
+            // Traineau de Noël en bas à gauche
+            Vector2 posTraineau = {975, 790}; // position x,y sur l’écran
+            float scaletraineau = 0.5f;               // ajuster la taille
+            DrawTextureEx(traineau, posTraineau, 0.0f, scaletraineau, WHITE);
+
+            // pion 
             float scale = (float)tailleCase / santa.width;
             Vector2 pPos = CaseToPos(player.pos, offsetX, offsetY, tailleCase);
 
@@ -830,9 +838,7 @@ int main(void) {
                         pPos.x + (tailleCase - santa.width * scale) / 2,
                         pPos.y + (tailleCase - santa.height * scale) / 2 + jumpOffset
                     },
-                    0.0f,
-                    scale,
-                    WHITE
+                    0.0f,scale,WHITE
                 );
             }
             
@@ -1163,6 +1169,7 @@ int main(void) {
     UnloadTexture(tree);
     UnloadTexture(gift);
     UnloadTexture(santa);
+    UnloadTexture(traineau);
     UnloadTexture(background);
     UnloadTexture(principalBG);
     UnloadFont(customFont);
