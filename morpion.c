@@ -183,7 +183,14 @@ int main(void) {
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(windowWidth, windowHeight, "Mini-Jeu : Morpion");
-    
+    //----------------------------------------
+    // 🎵 MUSIQUE MORPION : PIANO.mp3
+    //----------------------------------------
+    if (!IsAudioDeviceReady()) InitAudioDevice();
+    Music pianoMusic = LoadMusicStream("PIANO.mp3");
+    SetMusicVolume(pianoMusic, 1.0f);
+    PlayMusicStream(pianoMusic);
+
     fontNoel = LoadFontEx("MerryChristmasFlake.ttf", 80, 0, 0);
     GenTextureMipmaps(&fontNoel.texture);
     SetTextureFilter(fontNoel.texture, TEXTURE_FILTER_BILINEAR);
@@ -217,7 +224,7 @@ int main(void) {
     int shouldExit = 0; // permet sortie uniquement si le joueur a gagné
 
     while (1) {
-
+        UpdateMusicStream(pianoMusic);
         // Alt+F4 = quitter immédiatement
         if (IsKeyDown(KEY_LEFT_ALT) && IsKeyDown(KEY_F4)) break;
         // Si la fenêtre demande à se fermer, n'accepter que si le joueur a gagné
@@ -404,6 +411,7 @@ if (winner != PLAYER) {
     UnloadFont(fontNoel);
     UnloadFont(fontWin);
     UnloadFont(fontReplay);
+    UnloadMusicStream(pianoMusic);
 
     CloseWindow();
     return 0;

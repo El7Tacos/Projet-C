@@ -156,6 +156,16 @@ bool StartSudoku(Font ignoredFontFromPlateau) {
 
     // ----- CHARGEMENT ASSETS NOËL -----
     backgroundTex = LoadTexture("background.png");
+    //-----------------------------------------------------
+
+    // 🎵 MUSIQUE SUDOKU : PIANO.mp3
+    //-----------------------------------------------------
+    if (!IsAudioDeviceReady()) InitAudioDevice();
+
+    Music pianoMusic = LoadMusicStream("PIANO.mp3");
+    SetMusicVolume(pianoMusic, 1.0f);
+    PlayMusicStream(pianoMusic);
+
 
     fontTitle = LoadFontEx("MerryChristmasFlake.ttf", 80, 0, 0);
     GenTextureMipmaps(&fontTitle.texture);
@@ -173,6 +183,8 @@ bool StartSudoku(Font ignoredFontFromPlateau) {
     int originY = (H - totalSize) / 2;
     
     while (!WindowShouldClose()) {
+
+        UpdateMusicStream(pianoMusic);
 
         Vector2 mouse = GetMousePosition();
 
@@ -308,6 +320,7 @@ bool StartSudoku(Font ignoredFontFromPlateau) {
             UnloadTexture(backgroundTex);
             UnloadFont(fontTitle);
             UnloadFont(fontSubtitle);
+            UnloadMusicStream(pianoMusic);
             return true;
         }
 
@@ -318,6 +331,7 @@ bool StartSudoku(Font ignoredFontFromPlateau) {
     UnloadTexture(backgroundTex);
     UnloadFont(fontTitle);
     UnloadFont(fontSubtitle);
+    UnloadMusicStream(pianoMusic);
 
     return false;
 }

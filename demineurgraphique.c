@@ -599,6 +599,15 @@ static int RunDemineurLevel(int level)
 
         // Polices pour le jeu
     Font fontConsignes = LoadFontEx("SantasSleighFull Bold.ttf", 64, 0, 0);   // Bold
+    //----------------------------------------
+    // 🎵 MUSIQUE DU DEMINEUR : PIANO.mp3
+    //----------------------------------------
+    if (!IsAudioDeviceReady()) InitAudioDevice();
+
+    Music pianoMusic = LoadMusicStream("PIANO.mp3");
+    SetMusicVolume(pianoMusic, 1.0f);
+    PlayMusicStream(pianoMusic);
+
     GenTextureMipmaps(&fontConsignes.texture);
     SetTextureFilter(fontConsignes.texture, TEXTURE_FILTER_TRILINEAR);
 
@@ -657,6 +666,8 @@ static int RunDemineurLevel(int level)
     // ——————————————— BOUCLE DE JEU ———————————————
     while (!WindowShouldClose() && !quit)
     {
+        UpdateMusicStream(pianoMusic);
+
         Vector2 mouse = GetMousePosition();
 
         int gridTop = originY;
@@ -739,6 +750,7 @@ static int RunDemineurLevel(int level)
     UnloadFont(titleFont);
     UnloadFont(fontConsignes);
     UnloadTexture(gFlagTex);
+    UnloadMusicStream(pianoMusic);
 
     //CloseWindow;
     return result;
