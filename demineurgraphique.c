@@ -6,6 +6,9 @@
 #include <time.h>
 #include <stdio.h>
 #include <math.h>
+
+static Sound bombSound;
+
 Texture2D gFlagTex;
 
 #define CELL_SIZE 64
@@ -256,14 +259,18 @@ static void RevealCell(Game *g, int row, int col)
     }
     
     if (cell->hasMine) {
+
+        // 💥 joue le son d'explosion
+        PlaySound(bombSound);
+    
         g->gameOver = true;
         g->win = false;
-
+    
         for (int r = 0; r < g->size; r++)
             for (int c = 0; c < g->size; c++)
                 if (g->board[r][c].hasMine)
                     g->board[r][c].revealed = true;
-
+    
         return;
     }
 
@@ -458,7 +465,7 @@ static void DrawGame(const Game *g, int ox, int oy,
                (Vector2){ ox + gridW/2 - t.x/2, oy - t.y - 20 },
                titleSize,
                0,
-               (Color){ 180, 20, 20, 255 });
+               (DARKGREEN));
         // =============================
         // CONSIGNES (milieu à droite)
         // =============================
@@ -556,10 +563,10 @@ static void DrawGame(const Game *g, int ox, int oy,
         float fs = 48.0f;
 
         const char *msg = g->win ? msgWin : msgLose;
-        Vector2 s = MeasureTextEx(titleFont, msg, fs, 0);
+        Vector2 s = MeasureTextEx(fontConsignes, msg, fs, 0);
 
         // Message principal (win ou lose)
-        DrawTextEx(titleFont,
+        DrawTextEx(fontConsignes,
                    msg,
                    (Vector2){ ox + gridW/2 - s.x/2, oy + gridH + 40 },
                    fs,
@@ -570,9 +577,9 @@ static void DrawGame(const Game *g, int ox, int oy,
         if (!g->win) {
             const char *hint = "Appuyez sur R pour rejouer";
             float fs2 = 32.0f;
-            Vector2 s2 = MeasureTextEx(titleFont, hint, fs2, 0);
+            Vector2 s2 = MeasureTextEx(fontConsignes, hint, fs2, 0);
 
-            DrawTextEx(titleFont,
+            DrawTextEx(fontConsignes,
                        hint,
                        (Vector2){
                            ox + gridW/2 - s2.x/2,
@@ -605,6 +612,12 @@ static int RunDemineurLevel(int level)
     if (!IsAudioDeviceReady()) InitAudioDevice();
 
     Music pianoMusic = LoadMusicStream("PIANO.mp3");
+    //-----------------------------------------------------
+    // 💥 SON BOMBE
+    //-----------------------------------------------------
+    bombSound = LoadSound("bombe.mp3");
+    SetSoundVolume(bombSound, 4.0f);
+
     SetMusicVolume(pianoMusic, 1.0f);
     PlayMusicStream(pianoMusic);
 
@@ -750,6 +763,7 @@ static int RunDemineurLevel(int level)
     UnloadFont(titleFont);
     UnloadFont(fontConsignes);
     UnloadTexture(gFlagTex);
+    UnloadSound(bombSound);
     UnloadMusicStream(pianoMusic);
 
     //CloseWindow;
