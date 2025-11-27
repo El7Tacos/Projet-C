@@ -207,7 +207,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
 
         // Couleur de fond de case (alterné)
         Color base = (i % 2 == 0) ? caseA : caseB;
-        DrawRectangle(pos.x, pos.y, tailleCase, tailleCase, base);
+        DrawRectangleRounded(r, 0.15f, 6, base);  
         DrawRectangleRoundedLines(r, 0.15f, 6, Fade(contour, 0.35f));
 
         // ------ CASE SPÉCIALE 9 : RECULE ------
@@ -215,8 +215,8 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             const char *l1 = "SURPRISE";
             const char *l2 = "MAGIQUE !";
 
-            int size1 = 28;
-            int size2 = 22;
+            int size1 = 26;
+            int size2 = 26;
 
             Vector2 s1 = MeasureTextEx(font, l1, size1, 0);
             Vector2 s2 = MeasureTextEx(font, l2, size2, 0);
@@ -235,35 +235,32 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             const char *txt = "SUDOKU";
             Color col = ecriture_cases; 
         
-            Vector2 s = MeasureTextEx(font, txt, 24, 0);
+            Vector2 s = MeasureTextEx(font, txt, 26, 0);
             DrawTextEx(font, txt,
-                       (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},
-                       24, 0, col);
+                (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},24, 0, col);
         
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
+                (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
         else if (i == 3 || i == 11 || i == 16) {
             const char *txt = "PENDU";
             Color col = ecriture_cases;
         
-            Vector2 s = MeasureTextEx(font, txt, 24, 0);
+            Vector2 s = MeasureTextEx(font, txt, 26, 0);
         
             DrawTextEx(font, txt,
-                       (Vector2){pos.x + (tailleCase - s.x)/2,
-                                 pos.y + (tailleCase - s.y)/2},
-                       24, 0, col);
+                (Vector2){pos.x + (tailleCase - s.x)/2,pos.y + (tailleCase - s.y)/2},26, 0, col);
         
             // numéro de la case
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8},28, 0, numero_cases);
+                (Vector2){pos.x + 10, pos.y + 8},26, 0, numero_cases);
         }
         else if (i == 5) {
             const char *l1 = "RETOUR";
             const char *l2 = "DEPART !";
 
-            int size1 = 28;
-            int size2 = 22;
+            int size1 = 26;
+            int size2 = 26;
 
             Vector2 s1 = MeasureTextEx(font, l1, size1, 0);
             Vector2 s2 = MeasureTextEx(font, l2, size2, 0);
@@ -285,8 +282,8 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             const char *l1 = "CADEAU";
             const char *l2 = "DU LUTIN !";
 
-            int size1 = 28;
-            int size2 = 22;
+            int size1 = 26;
+            int size2 = 26;
 
             Vector2 s1 = MeasureTextEx(font, l1, size1, 0);
             Vector2 s2 = MeasureTextEx(font, l2, size2, 0);
@@ -297,7 +294,6 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             float baseY = pos.y + (tailleCase - (s1.y + s2.y + 4)) / 2;
 
             DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0,(ecriture_cases));    
-
             DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 4}, size2, 0,(ecriture_cases));
 
             // numéro de la case 
@@ -308,8 +304,8 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             const char *txt1 = "TELEPORTATION";
             const char *txt2 = "MAGIQUE !";
         
-            int size1 = 22;
-            int size2 = 18;
+            int size1 = 24;
+            int size2 = 25;
         
             Vector2 s1 = MeasureTextEx(font, txt1, size1, 0);
             Vector2 s2 = MeasureTextEx(font, txt2, size2, 0);
@@ -330,25 +326,23 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             const char *txt = "MORPION";
             Color col = ecriture_cases; 
 
-            Vector2 s = MeasureTextEx(font, txt, 24, 0);
+            Vector2 s = MeasureTextEx(font, txt, 26, 0);
             DrawTextEx(font, txt,
-                       (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},
-                       24, 0, col);
+                (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},24, 0, col);
 
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
+                (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
         else if (i == 14) {
             const char *txt = "MORPION";
             Color col = ecriture_cases;
         
-            Vector2 s = MeasureTextEx(font, txt, 24, 0);
+            Vector2 s = MeasureTextEx(font, txt, 26, 0);
             DrawTextEx(font, txt,
-                       (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},
-                       24, 0, col);
+                (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},24, 0, col);
         
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
+                (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
         
         // ------ CASE SPÉCIALE 10 : SUDOKU ------
@@ -356,10 +350,9 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             const char *txt = "SUDOKU";
             Color col = ecriture_cases; 
         
-            Vector2 s = MeasureTextEx(font, txt, 24, 0);
+            Vector2 s = MeasureTextEx(font, txt, 26, 0);
             DrawTextEx(font, txt,
-                       (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},
-                       24, 0, col);
+                (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},26, 0, col);
         
             DrawTextEx(font, TextFormat("%d", i),
                        (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
@@ -368,8 +361,8 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             const char *txt1 = "REPOS";
             const char *txt2 = "MERITE !";
         
-            int size1 = 22;
-            int size2 = 18;
+            int size1 = 26;
+            int size2 = 26;
         
             Vector2 s1 = MeasureTextEx(font, txt1, size1, 0);
             Vector2 s2 = MeasureTextEx(font, txt2, size2, 0);
@@ -388,8 +381,8 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             const char *l1 = "CADEAU";
             const char *l2 = "SURPRISE !";
         
-            int size1 = 28;
-            int size2 = 24;
+            int size1 = 26;
+            int size2 = 26;
         
             Vector2 s1 = MeasureTextEx(font, l1, size1, 0);
             Vector2 s2 = MeasureTextEx(font, l2, size2, 0);
@@ -409,7 +402,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             const char *txt = "SUDOKU";
             Color col = ecriture_cases; 
         
-            Vector2 s = MeasureTextEx(font, txt, 24, 0);
+            Vector2 s = MeasureTextEx(font, txt, 26, 0);
             DrawTextEx(font, txt,
                        (Vector2){pos.x + (tailleCase - s.x)/2, pos.y + (tailleCase - s.y)/2},
                        24, 0, col);
@@ -421,8 +414,8 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             const char *l1 = "SURPRISE";
             const char *l2 = "DU PERE NOEL !";
         
-            int size1 = 28;
-            int size2 = 22;
+            int size1 = 25;
+            int size2 = 25;
         
             Vector2 s1 = MeasureTextEx(font, l1, size1, 0);
             Vector2 s2 = MeasureTextEx(font, l2, size2, 0);
@@ -444,7 +437,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             const char *txt = "DEMINEUR";
             Color col = ecriture_cases; 
 
-            Vector2 s = MeasureTextEx(font, txt, 22, 0);
+            Vector2 s = MeasureTextEx(font, txt, 26, 0);
             DrawTextEx(font, txt,
                     (Vector2){pos.x + (tailleCase - s.x)/2,
                                 pos.y + (tailleCase - s.y)/2},
@@ -459,7 +452,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             const char *txt = "DEMINEUR";
             Color col = ecriture_cases;
 
-            Vector2 s = MeasureTextEx(font, txt, 22, 0);
+            Vector2 s = MeasureTextEx(font, txt, 26, 0);
             DrawTextEx(font, txt,
                     (Vector2){pos.x + (tailleCase - s.x)/2,
                                 pos.y + (tailleCase - s.y)/2},
@@ -474,14 +467,12 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             const char *txt = "DEMINEUR";
             Color col = ecriture_cases;
 
-            Vector2 s = MeasureTextEx(font, txt, 22, 0);
+            Vector2 s = MeasureTextEx(font, txt, 26, 0);
             DrawTextEx(font, txt,
-                    (Vector2){pos.x + (tailleCase - s.x)/2,
-                                pos.y + (tailleCase - s.y)/2},
-                    22, 0, col);
+                (Vector2){pos.x + (tailleCase - s.x)/2,pos.y + (tailleCase - s.y)/2},22, 0, col);
 
             DrawTextEx(font, TextFormat("%d", i),
-                    (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
+                (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
 
 
