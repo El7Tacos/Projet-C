@@ -289,6 +289,15 @@ int main() {
     const int screenHeight = 1080;
     InitWindow(screenWidth, screenHeight, "Mini-Jeu : Pendu");
 
+    //-----------------------------------------------------
+    // 🎵 MUSIQUE PENDU : PIANO.mp3
+    //-----------------------------------------------------
+    if (!IsAudioDeviceReady()) InitAudioDevice();
+
+    Music pianoMusic = LoadMusicStream("PIANO.mp3");
+    SetMusicVolume(pianoMusic, 1.0f);
+    PlayMusicStream(pianoMusic);
+
     initSnowflakes(screenWidth, screenHeight);
 
     
@@ -309,6 +318,9 @@ int main() {
 
 
     while (true) {    
+
+        UpdateMusicStream(pianoMusic);
+
         if (IsKeyDown(KEY_LEFT_ALT) && IsKeyDown(KEY_F4)) break;   // Alt+F4 pour quitter
         // Input AZERTY
             // Tableau des lettres correspondant aux touches AZERTY
@@ -429,6 +441,7 @@ int main() {
     UnloadFont(fontNoel);
     UnloadFont(fontWin);
     UnloadFont(fontSleigh);
+    UnloadMusicStream(pianoMusic);
     CloseWindow();
     return 0;
 }
