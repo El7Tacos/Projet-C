@@ -538,9 +538,17 @@ int main(void) {
     GenTextureMipmaps(&customFont.texture);
     SetTextureFilter(customFont.texture, TEXTURE_FILTER_TRILINEAR);
 
-    Font santaFont = LoadFontEx("Candcu_.ttf", 140, 0, 0);
-    GenTextureMipmaps(&santaFont.texture);
-    SetTextureFilter(santaFont.texture, TEXTURE_FILTER_TRILINEAR);
+    Font fontCandy = LoadFontEx("Candcu_.ttf", 140, 0, 0);
+    GenTextureMipmaps(&fontCandy.texture);
+    SetTextureFilter(fontCandy.texture, TEXTURE_FILTER_TRILINEAR);
+
+    Font fontSantabold = LoadFontEx("SantasSleighFull Bold.ttf", 80, 0, 0); 
+    GenTextureMipmaps(&fontSantabold.texture);
+    SetTextureFilter(fontSantabold.texture, TEXTURE_FILTER_BILINEAR);
+
+    Font fontSanta = LoadFontEx("SantasSleighFull.ttf", 50, 0, 0); 
+    GenTextureMipmaps(&fontSanta.texture);
+    SetTextureFilter(fontSanta.texture, TEXTURE_FILTER_BILINEAR);
 
     GameState state = STATE_MENU;
 
@@ -722,7 +730,7 @@ int main(void) {
             float bannerW = bannerNoel.width * scaleBanner;
             float bannerH = bannerNoel.height * scaleBanner;
 
-            float offsetX = -20;  // AJUSTE ICI pour centrer nickel
+            float offsetX = -20;  // Ajustage horizontal banière
 
             float bannerX = 1920/2 - bannerW/2 + offsetX;
             float bannerY = 40;
@@ -735,24 +743,23 @@ int main(void) {
                 WHITE
             );
 
-
             // --- Nouveaux boutons stylés ---
             Rectangle btnPlay  = (Rectangle){ 800, 500, 320, 90 };
             Rectangle btnOpt   = (Rectangle){ 800, 620, 320, 90 };
             Rectangle btnQuit  = (Rectangle){ 800, 740, 320, 90 };
 
             // Bouton JOUER
-            if (DrawFancyButton(santaFont, "JOUER", btnPlay)) {
+            if (DrawFancyButton(fontCandy, "JOUER", btnPlay)) {
                 state = STATE_BOARD;
             }
 
             // Bouton OPTIONS
-            if (DrawFancyButton(santaFont, "OPTIONS", btnOpt)) {
+            if (DrawFancyButton(fontCandy, "OPTIONS", btnOpt)) {
                 state = STATE_OPTIONS;
             }
 
             // Bouton QUITTER
-            if (DrawFancyButton(santaFont, "QUITTER", btnQuit)) {
+            if (DrawFancyButton(fontCandy, "QUITTER", btnQuit)) {
                 shouldExit = true;
             }
 
@@ -886,30 +893,30 @@ int main(void) {
 
                         // ----- TITRE TABLEAU DE BORD -----
             // texte centré horizontalement
-            const char *dashTitle = "TABLEAU DE BORD";
-            float dashSize = 42;
+            const char *dashTitle = "Tableau de bord";
+            float dashSize = 80;
             Vector2 dashMeasure = MeasureTextEx(font, dashTitle, dashSize, 0);
 
             // centre dans le panneau
             float dashX = sidePanel.x + (sidePanel.width - dashMeasure.x) / 2;
             float dashY = 80;
 
-            DrawTextEx(font, dashTitle, (Vector2){dashX, dashY}, dashSize, 0, accent);
+            DrawTextEx(customFont, dashTitle, (Vector2){dashX, dashY}, dashSize, 0, DARKBLUE);
 
-            // ---- Soulignement décoratif (ligne verte + ligne blanche) ----
+            // ---- Soulignement décoratif (ligne verte + ligne bleue) ----
             float underlineWidth = dashMeasure.x + 20;    // petite marge
             float underlineX = sidePanel.x + (sidePanel.width - underlineWidth) / 2;
             float underlineY = dashY + dashMeasure.y + 6;
 
-            DrawRectangle(underlineX, underlineY, underlineWidth, 4, (Color){0, 120, 0, 255});
-            DrawRectangle(underlineX, underlineY + 4, underlineWidth, 2, WHITE);
+            DrawRectangle(underlineX, underlineY, underlineWidth, 4, accent);
+            DrawRectangle(underlineX, underlineY + 4, underlineWidth, 2, DARKBLUE);
 
             // ----- Carte OBJECTIF -----
             const char *obj = "Objectif : atteindre la case 19 !";
 
             // Taille du texte
-            float objSize = 30;
-            Vector2 objMeasure = MeasureTextEx(font, obj, objSize, 0);
+            float objSize = 50;
+            Vector2 objMeasure = MeasureTextEx(fontSantabold, obj, objSize, 0);
 
             // Position de la carte
             Rectangle cardObj = {
@@ -934,7 +941,7 @@ int main(void) {
             float objY = cardObj.y + (cardObj.height - objMeasure.y) / 2;
 
             // Texte objectif
-            DrawTextEx(font, obj, (Vector2){objX, objY}, objSize, 0, accent);
+            DrawTextEx(fontSantabold, obj, (Vector2){objX, objY}, objSize, 0, DARKBLUE);
 
 
             // Déplacement + arrivée ce frame (avance OU recule vers la cible)
