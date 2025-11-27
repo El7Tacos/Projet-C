@@ -780,12 +780,12 @@ int main(void) {
             // Titre OPTIONS avec la même police que le menu
             const char *optTitle = "OPTIONS";
             int optSize = 120;
-            Vector2 optS = MeasureTextEx(santaFont, optTitle, optSize, 0);
+            Vector2 optS = MeasureTextEx(fontCandy, optTitle, optSize, 0);
 
             float optX = 1920/2 - optS.x/2;
             float optY = 200;
 
-            DrawTextEx(santaFont, optTitle, (Vector2){optX, optY}, optSize, 0, accent);
+            DrawTextEx(fontSantabold, optTitle, (Vector2){optX, optY}, optSize, 0, accent);
 
             float btnWidth  = 320;
             float btnHeight = 90;
@@ -808,13 +808,13 @@ int main(void) {
             // Bouton musique ON/OFF
             const char *musicLabel = musicEnabled ? "Musique : ON" : "Musique : OFF";
 
-            if (DrawButton(santaFont, musicLabel, musicBtn,
+            if (DrawButton(fontSantabold, musicLabel, musicBtn,
                            (Color){200,100,40,255}, (Color){240,130,60,255}, 50)) {
                 musicEnabled = !musicEnabled;
             }
 
             // Bouton retour
-            if (DrawButton(santaFont, "RETOUR", backBtn, accent, accentLight, 60)) {
+            if (DrawButton(fontSantabold, "RETOUR", backBtn, accent, accentLight, 60)) {
                 state = STATE_MENU;
             }
         } break;
