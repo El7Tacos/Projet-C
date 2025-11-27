@@ -912,6 +912,21 @@ int main(void) {
             // Dessin du fond du plateau
             DrawTextureEx(background, (Vector2){0, 0}, 0.0f, 1.0f, WHITE);
 
+            // Afficher la bannière du Pere Noel en haut, entre le sapin et le tableau de bord
+            float scaleBoardBanner = 0.33f;
+            float boardBannerW = bannerNoel.width * scaleBoardBanner;
+            float boardBannerH = bannerNoel.height * scaleBoardBanner;
+
+            // On la place vers la droite, avant le panneau latéral
+            float boardBannerX = sidePanel.x - boardBannerW - 160; // 40 px de marge avant le panneau
+            float boardBannerY = 40;                              // en haut de l'écran
+
+            DrawTextureEx(bannerNoel,
+                          (Vector2){ boardBannerX, boardBannerY },
+                          0.0f,
+                          scaleBoardBanner,
+                          WHITE);
+
             // Dessin des flocons de neige en arrière-plan (décor random)
             for (int i = 0; i < 10; i++) {
                 DrawTexture(snowflake, rand() % 1920, rand() % 1080, WHITE);
@@ -1155,28 +1170,23 @@ int main(void) {
             char txtTriche[64];
             snprintf(txtTriche, sizeof(txtTriche), "Valeur truquee : %d", tricheValue);
 
-            int textSize = 32;
-            Vector2 textMeasure = MeasureTextEx(font, txtTriche, textSize, 0);
+            int textSize = 36;
+            Vector2 textMeasure = MeasureTextEx(fontSantabold, txtTriche, textSize, 0);
 
-            // Centre X du panneau pour alignements
             float centerX = sidePanel.x + sidePanel.width / 2.0f;
-
-            // Position du texte = centré horizontalement sur le dé truqué (maintenant au-dessus)
             float tricheX = centerX - (textMeasure.x / 2.0f);
             float tricheY = diceY - 260;
 
-            // Ombre
-            DrawTextEx(font, txtTriche, (Vector2){tricheX + 2, tricheY + 2}, textSize, 0, (Color){0,0,0,80});
-
-            // Texte principal
-            DrawTextEx(font, txtTriche, (Vector2){tricheX, tricheY}, textSize, 0, (Color){20,80,20,255});
+            // Texte simple, sans ombre ni glow
+            DrawTextEx(fontSantabold, txtTriche,
+                       (Vector2){tricheX, tricheY}, textSize, 0,
+                       (Color){0, 100, 0, 255});
 
             // Clique droit → changer valeur
             if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
                 tricheValue++;
                 if (tricheValue > 19) tricheValue = 1;
             }
-
 
                 // Dé inférieur (normal) — centré dans le panneau
                 Rectangle diceRect = (Rectangle){
@@ -1226,10 +1236,6 @@ int main(void) {
 
                 DrawRectangleRounded(fixedDiceRect, 0.35f, 8, WHITE);
                 DrawRectangleRoundedLines(fixedDiceRect, 0.35f, 8, accent);
-
-                if (CheckCollisionPointRec(mouse, fixedDiceRect)) {
-                    DrawDiceHighlight(fixedDiceRect);
-                }
 
                 DrawDiceDots(fixedDiceRect, 1, accentLight);
 
