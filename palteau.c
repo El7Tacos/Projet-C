@@ -18,6 +18,10 @@
 #include "demineur.h"
 #include "five.h"
 
+// Couleurs personnalisées
+const Color ecriture_cases = {239,184,16, 255}; //Couleur écriture des cases
+const Color numero_cases = {27,41,76,255}; //Couleur numéro des cases
+
 bool DrawFancyButton(Font font, const char *text, Rectangle rec) {
 
     Vector2 mouse = GetMousePosition();
@@ -45,17 +49,15 @@ bool DrawFancyButton(Font font, const char *text, Rectangle rec) {
     );
 
     // Texte centré
-    int size = rec.height * 0.55f;   // plus lisible pour Santa Sleigh Full
-    if (size < 40) size = 40;        // taille minimale pour éviter le fallback
+    int size = rec.height * 0.55f;   
+    if (size < 40) size = 40;        
     Vector2 s = MeasureTextEx(font, text, size, 0);
 
     DrawTextEx(
         font,
         text,
         (Vector2){ rec.x + rec.width/2 - s.x/2, rec.y + rec.height/2 - s.y/2 },
-        size,
-        0,
-        gold
+        size,0,gold
     );
 
     return hover && IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
@@ -223,15 +225,15 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             float x2 = pos.x + (tailleCase - s2.x) / 2;
             float baseY = pos.y + (tailleCase - (s1.y + s2.y)) / 2;
 
-            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0, (Color){200,50,50,255});
-            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 4}, size2, 0, (Color){200,50,50,255});
+            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0, ecriture_cases);
+            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 4}, size2, 0, ecriture_cases);
 
             DrawTextEx(font, TextFormat("%d", i), 
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
         else if (i == 1) {
             const char *txt = "SUDOKU";
-            Color col = RED; // facile → bleu
+            Color col = ecriture_cases; 
         
             Vector2 s = MeasureTextEx(font, txt, 24, 0);
             DrawTextEx(font, txt,
@@ -239,11 +241,11 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
                        24, 0, col);
         
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
         else if (i == 3 || i == 11 || i == 16) {
             const char *txt = "PENDU";
-            Color col = DARKGREEN;
+            Color col = ecriture_cases;
         
             Vector2 s = MeasureTextEx(font, txt, 24, 0);
         
@@ -254,8 +256,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
         
             // numéro de la case
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8},
-                       28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8},28, 0, numero_cases);
         }
         else if (i == 5) {
             const char *l1 = "RETOUR";
@@ -272,15 +273,13 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
 
             float baseY = pos.y + (tailleCase - (s1.y + s2.y + 4)) / 2;
 
-            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0,
-                        (BLACK));    // vert bonus
+            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0,(ecriture_cases));    
 
-            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 4}, size2, 0,
-                        (BLACK));
+            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 4}, size2, 0,(ecriture_cases));
 
-            // numéro de la case (comme toutes les autres)
+            // numéro de la case
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
         else if (i == 4) {
             const char *l1 = "CADEAU";
@@ -297,15 +296,13 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
 
             float baseY = pos.y + (tailleCase - (s1.y + s2.y + 4)) / 2;
 
-            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0,
-                        (BLACK));    // vert bonus
+            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0,(ecriture_cases));    
 
-            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 4}, size2, 0,
-                        (BLACK));
+            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 4}, size2, 0,(ecriture_cases));
 
-            // numéro de la case (comme toutes les autres)
+            // numéro de la case 
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
 
             } else if (i == 7) {
             const char *txt1 = "TELEPORTATION";
@@ -321,17 +318,17 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             float x2 = pos.x + (tailleCase - s2.x)/2;
             float baseY = pos.y + (tailleCase - (s1.y + s2.y + 4)) / 2;
         
-            DrawTextEx(font, txt1, (Vector2){x1, baseY}, size1, 0, (BLACK));
-            DrawTextEx(font, txt2, (Vector2){x2, baseY + s1.y + 4}, size2, 0, (BLACK));
+            DrawTextEx(font, txt1, (Vector2){x1, baseY}, size1, 0, (ecriture_cases));
+            DrawTextEx(font, txt2, (Vector2){x2, baseY + s1.y + 4}, size2, 0, (ecriture_cases));
         
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
         
                 // ------ CASE SPÉCIALE 8 : MORPION ------
         else if (i == 8) {
             const char *txt = "MORPION";
-            Color col = PURPLE; // couleur au choix
+            Color col = ecriture_cases; 
 
             Vector2 s = MeasureTextEx(font, txt, 24, 0);
             DrawTextEx(font, txt,
@@ -339,11 +336,11 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
                        24, 0, col);
 
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
         else if (i == 14) {
             const char *txt = "MORPION";
-            Color col = PURPLE;
+            Color col = ecriture_cases;
         
             Vector2 s = MeasureTextEx(font, txt, 24, 0);
             DrawTextEx(font, txt,
@@ -351,13 +348,13 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
                        24, 0, col);
         
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
         
         // ------ CASE SPÉCIALE 10 : SUDOKU ------
         else if (i == 10) {
             const char *txt = "SUDOKU";
-            Color col = RED; // moyen → orange
+            Color col = ecriture_cases; 
         
             Vector2 s = MeasureTextEx(font, txt, 24, 0);
             DrawTextEx(font, txt,
@@ -365,7 +362,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
                        24, 0, col);
         
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
         else if (i == 12) {
             const char *txt1 = "REPOS";
@@ -381,11 +378,11 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             float x2 = pos.x + (tailleCase - s2.x)/2;
             float baseY = pos.y + (tailleCase - (s1.y + s2.y + 4)) / 2;
         
-            DrawTextEx(font, txt1, (Vector2){x1, baseY}, size1, 0, (BLACK));
-            DrawTextEx(font, txt2, (Vector2){x2, baseY + s1.y + 4}, size2, 0, (BLACK));
+            DrawTextEx(font, txt1, (Vector2){x1, baseY}, size1, 0, (ecriture_cases));
+            DrawTextEx(font, txt2, (Vector2){x2, baseY + s1.y + 4}, size2, 0, (ecriture_cases));
         
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
 
         } else if (i == 15) {
             const char *l1 = "CADEAU";
@@ -401,16 +398,16 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             float x2 = pos.x + (tailleCase - s2.x) / 2;
             float baseY = pos.y + (tailleCase - (s1.y + s2.y + 6)) / 2;
         
-            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0, (BLACK));
-            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 6}, size2, 0, (BLACK));
+            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0, (ecriture_cases));
+            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 6}, size2, 0, (ecriture_cases));
         
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
         
         else if (i == 17) {
             const char *txt = "SUDOKU";
-            Color col = RED; // difficile → rouge
+            Color col = ecriture_cases; 
         
             Vector2 s = MeasureTextEx(font, txt, 24, 0);
             DrawTextEx(font, txt,
@@ -418,7 +415,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
                        24, 0, col);
         
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
         else if (i == 18) {
             const char *l1 = "SURPRISE";
@@ -435,17 +432,17 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
         
             float baseY = pos.y + (tailleCase - (s1.y + s2.y + 6)) / 2;
         
-            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0, (BLACK));
-            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 6}, size2, 0, (BLACK));
+            DrawTextEx(font, l1, (Vector2){x1, baseY}, size1, 0, (ecriture_cases));
+            DrawTextEx(font, l2, (Vector2){x2, baseY + s1.y + 6}, size2, 0, (ecriture_cases));
         
             // numéro de la case
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
         // ------ CASE DEMINEUR FACILE (Case 3) ------
         else if (i == 2) {
             const char *txt = "DEMINEUR";
-            Color col = DARKBLUE; // facile → bleu
+            Color col = ecriture_cases; 
 
             Vector2 s = MeasureTextEx(font, txt, 22, 0);
             DrawTextEx(font, txt,
@@ -454,13 +451,13 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
                     22, 0, col);
 
             DrawTextEx(font, TextFormat("%d", i),
-                    (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                    (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
 
         // ------ CASE DEMINEUR MOYEN (Case 12) ------
         else if (i == 6) {
             const char *txt = "DEMINEUR";
-            Color col = DARKBLUE; // moyen → orange
+            Color col = ecriture_cases;
 
             Vector2 s = MeasureTextEx(font, txt, 22, 0);
             DrawTextEx(font, txt,
@@ -469,13 +466,13 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
                     22, 0, col);
 
             DrawTextEx(font, TextFormat("%d", i),
-                    (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                    (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
 
         // ------ CASE DEMINEUR DIFFICILE (Case 16) ------
         else if (i == 13) {
             const char *txt = "DEMINEUR";
-            Color col = DARKBLUE;
+            Color col = ecriture_cases;
 
             Vector2 s = MeasureTextEx(font, txt, 22, 0);
             DrawTextEx(font, txt,
@@ -484,7 +481,7 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
                     22, 0, col);
 
             DrawTextEx(font, TextFormat("%d", i),
-                    (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                    (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
 
 
@@ -497,9 +494,9 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             float x = pos.x + (tailleCase - s.x) / 2;
             float y = pos.y + (tailleCase - s.y) / 2;
 
-            DrawTextEx(font, txt, (Vector2){x, y}, size, 0, (MAGENTA));
+            DrawTextEx(font, txt, (Vector2){x, y}, size, 0, (ecriture_cases));
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
         // ------ CASE FINALE : ARRIVÉE (19) ------
         else if (i == totalCases - 1) {
@@ -510,17 +507,17 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
             float x = pos.x + (tailleCase - s.x) / 2;
             float y = pos.y + (tailleCase - s.y) / 2;
 
-            // texte bien visible en vert foncé
-            DrawTextEx(font, txt, (Vector2){x, y}, size, 0, (MAGENTA));
+            // texte case
+            DrawTextEx(font, txt, (Vector2){x, y}, size, 0, (ecriture_cases));
 
-            // garde le numéro 19 dans le coin comme les autres
+            // numéro case 19 
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
         // ------ CASE NORMALE ------
         else {
             DrawTextEx(font, TextFormat("%d", i),
-                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, accent);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
     }
 }
@@ -536,7 +533,7 @@ int main(void) {
     Music music = LoadMusicStream("All-is-fine.mp3");  // Charge la musique
     PlayMusicStream(music);            // Lance la musique
 
-    SetExitKey(KEY_NULL); // ESC ne ferme pas la fenêtre
+    SetExitKey(KEY_NULL); 
     SetTargetFPS(60);
     srand((unsigned)time(NULL));
 
@@ -579,8 +576,11 @@ int main(void) {
     Color bg2 = (Color){200, 0, 0, 255};     // Rouge Noël
     Color accent = (Color){0, 100, 0, 255};  // Vert sapin
     Color accentLight = (Color){0, 150, 0, 255};
-    Color caseA = (Color){255, 255, 200, 255}; // Jaune pâle pour les cases
-    Color caseB = (Color){255, 220, 180, 255}; // Beige pour les cases
+    Color caseA = (Color){180, 40, 40, 255}; // Rouge pâle pour les cases
+    Color caseB = (Color){40, 120, 60, 255}; // Vert pour les cases
+    const Color ecriture_cases = {255, 215, 0, 255}; //Couleur écriture des cases
+    const Color numero_cases = {27,41,76,255}; //Couleur numéro des cases
+
 
     // Ajout d'éléments décoratifs de Noël
     Texture2D snowflake = LoadTexture("snowflake.png"); // Flocon de neige

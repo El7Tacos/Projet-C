@@ -80,7 +80,7 @@ typedef struct {
 } Dice3D;
 
 // ============================================================
-// ORIENTATION DE LA FACE OPPOSÉE AU SOL (FACE GAGNANTE VERS LE BAS)
+// ORIENTATION DE LA FACE 
 // ============================================================
 static Vector3 GetFaceRotation(int face)
 {
@@ -115,7 +115,6 @@ static void DrawLightHalo(Vector3 pos)
 }
 
 
-
 void DrawDiceWithDots(Vector3 pos, float size, Color bodyColor, Color dotColor)
 {
     float r = size / 2.0f;
@@ -126,7 +125,7 @@ void DrawDiceWithDots(Vector3 pos, float size, Color bodyColor, Color dotColor)
     DrawCube(pos, size, size, size, bodyColor);
     DrawCubeWires(pos, size, size, size, BLACK);
 
-    // POINTS (disques dorés)
+    
     // FACE +Z (1)
     DrawFlatDot((Vector3){pos.x, pos.y, pos.z + r}, (Vector3){0, 0, 1}, dotRadius * 1.2f, dotColor);
     // FACE -Z (2)
@@ -148,7 +147,7 @@ void DrawDiceWithDots(Vector3 pos, float size, Color bodyColor, Color dotColor)
     DrawFlatDot((Vector3){pos.x - d, pos.y + r, pos.z + d}, (Vector3){0, 1, 0}, dotRadius, dotColor);
     DrawFlatDot((Vector3){pos.x + d, pos.y + r, pos.z + d}, (Vector3){0, 1, 0}, dotRadius, dotColor);
 
-    // FACE -Y (6) - réajustement pour que les points ne se touchent pas
+    // FACE -Y (6) 
     float d6 = d * 1.1f;
     float r6 = dotRadius * 0.8f;
 
@@ -298,15 +297,16 @@ int LaunchDice3D(Font font)
             int alpha = 150 + (int)(105 * sinf(GetTime()*4.0f));
             DrawTextEx(fontWin, "Le de roule...", (Vector2){900,950}, 50, 0, (Color){80,80,80,alpha});
         } else {
-        // Ligne 1 (résultat)
+            
+        // Résultat
         const char* line1 = TextFormat("Resultat : %d", finalResult);
-        int fontSize1 = 80;                     // Taille différente
-        Color color1 = DARKGREEN;                    // Couleur différente
+        int fontSize1 = 80;                  
+        Color color1 = DARKGREEN;                    
 
-        // Ligne 2 (instructions)
+        // Instructions
         const char* line2 = "cliquez sur ENTRER pour continuer";
-        int fontSize2 = 40;                     // Taille différente
-        Color color2 = DARKBLUE;                // Couleur différente
+        int fontSize2 = 40;                     
+        Color color2 = DARKBLUE;               
 
         // Mesurer largeur des deux lignes
         Vector2 size1 = MeasureTextEx(fontWin, line1, fontSize1, 0);
