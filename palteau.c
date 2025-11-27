@@ -596,6 +596,7 @@ int main(void) {
     Texture2D background = LoadTexture("fond2.jpg");
     Texture2D principalBG = LoadTexture("principal.png");
     Texture2D bannerNoel = LoadTexture("perenoel.png");
+    Texture2D optionsBG = LoadTexture("option.jpg");
 
 
     //-----------------------------------------------------
@@ -636,6 +637,65 @@ int main(void) {
 
         BeginDrawing();
         ClearBackground(bg1);
+
+        // ------------------------------------------------------
+        // Guirlandes du sapin (persistantes sur tous les écrans)
+        // ------------------------------------------------------
+        {
+            const int sapinX = 430;
+            const int sapinY = 150;
+            const int height = 730;
+            const int width  = 500;
+
+            const int lightsCount = 42;
+            static Vector2 lightPos[64];
+            static int lightColorIndex[64];
+            static bool initializedLights = false;
+
+            Color palette[] = {
+                {255, 240, 80, 255},
+                {255, 60, 60, 255},
+                {60, 255, 90, 255},
+                {90, 140, 255, 255}
+            };
+            int paletteCount = 4;
+
+            if (!initializedLights) {
+                initializedLights = true;
+                for (int i = 0; i < lightsCount; i++) {
+                    float t = (float)i / (lightsCount - 1);
+                    float rowWidth = width * t;
+                    if (rowWidth < 20) rowWidth = 20;
+
+                    float y = sapinY + t * height;
+                    float x = sapinX - rowWidth/2 + (rand() % (int)rowWidth);
+
+                    if (y > sapinY + height * 0.88f) {
+                        y -= 60 + (rand() % 50);
+                    }
+
+                    lightPos[i] = (Vector2){x, y};
+                    lightColorIndex[i] = rand() % paletteCount;
+                }
+            }
+
+            for (int i = 0; i < lightsCount; i++) {
+                float t = GetTime()*3.5f + i*0.35f;
+                float intensity = 0.4f + 0.6f * (0.5f + 0.5f * sinf(t));
+
+                Color base = palette[lightColorIndex[i]];
+                Color glow = (Color){
+                    base.r,
+                    base.g,
+                    base.b,
+                    (unsigned char)(190 * intensity)
+                };
+
+                DrawCircleV(lightPos[i], 8,
+                    (Color){glow.r, glow.g, glow.b, (unsigned char)(70 * intensity)});
+                DrawCircleV(lightPos[i], 4, glow);
+            }
+        }
 
         switch (state) {
 
@@ -767,54 +827,81 @@ int main(void) {
 
         // ============ OPTIONS ============
         case STATE_OPTIONS: {
-            // Même background que le menu principal
+            // Fond image pour l'ecran d'options
             DrawTexturePro(
-                principalBG,
-                (Rectangle){0, 0, principalBG.width, principalBG.height},
+                optionsBG,
+                (Rectangle){0, 0, optionsBG.width, optionsBG.height},
                 (Rectangle){0, 0, 1920, 1080},
                 (Vector2){0, 0},
                 0,
                 WHITE
             );
 
-            // Titre OPTIONS avec la même police que le menu
+            // Grande carte centrale en verre dépoli
+            Rectangle card = (Rectangle){ 460, 140, 1000, 800 };
+            Color glass = (Color){255, 255, 255, 180};
+            DrawRectangleRounded(card, 0.12f, 20, glass);
+            DrawRectangleRoundedLines(card, 0.12f, 20, (Color){255,255,255,220});
+
+            // Bordure extérieure en guirlande (lignes vertes/rouges)
+            DrawRectangleLinesEx((Rectangle){card.x-6, card.y-6, card.width+12, card.height+12},
+                                 4, (Color){0,150,0,200});
+            DrawRectangleLinesEx((Rectangle){card.x-14, card.y-14, card.width+28, card.height+28},
+                                 3, (Color){220,40,40,200});
+
+            // Quelques flocons en fond léger
+            for (int i = 0; i < 40; i++) {
+                int x = GetRandomValue(0, 1920);
+                int y = GetRandomValue(0, 1080);
+                DrawTexture(snowflake, x, y, (Color){255,255,255,80});
+            }
+
+            // Titre OPTIONS centré en haut de la carte
             const char *optTitle = "OPTIONS";
             int optSize = 120;
-            Vector2 optS = MeasureTextEx(fontCandy, optTitle, optSize, 0);
+            Vector2 optS = MeasureTextEx(fontSantabold, optTitle, optSize, 0);
 
-            float optX = 1920/2 - optS.x/2;
-            float optY = 200;
+            float optX = card.x + (card.width  - optS.x) / 2.0f;
+            float optY = card.y + 40;
 
-            DrawTextEx(fontSantabold, optTitle, (Vector2){optX, optY}, optSize, 0, accent);
+            DrawTextEx(fontSantabold, optTitle, (Vector2){optX, optY}, optSize, 0,
+                       (Color){180, 20, 40, 255});
 
-            float btnWidth  = 320;
-            float btnHeight = 90;
-            float centerX   = 1920 / 2.0f;
+            // Ligne décorative sous le titre
+            float decoW = optS.x + 40;
+            float decoX = card.x + (card.width - decoW) / 2.0f;
+            float decoY = optY + optS.y + 10;
+            DrawRectangle(decoX, decoY, decoW, 4, (Color){0,140,60,255});
+            DrawRectangle(decoX, decoY + 5, decoW, 2, (Color){255, 230, 150, 255});
+
+            // Boutons centrés dans la carte
+            float btnWidth  = 420;
+            float btnHeight = 100;
+            float centerX   = card.x + card.width / 2.0f;
 
             Rectangle musicBtn = (Rectangle){
                 centerX - btnWidth/2,
-                 450,
+                decoY + 80,
                 btnWidth,
                 btnHeight
             };
 
             Rectangle backBtn = (Rectangle){
                 centerX - btnWidth/2,
-                580,
+                musicBtn.y + btnHeight + 60,
                 btnWidth,
                 btnHeight
             };
 
-            // Bouton musique ON/OFF
             const char *musicLabel = musicEnabled ? "Musique : ON" : "Musique : OFF";
 
-            if (DrawButton(fontSantabold, musicLabel, musicBtn,
-                           (Color){200,100,40,255}, (Color){240,130,60,255}, 50)) {
+            // Bouton musique ON/OFF (même style que les gros boutons du menu)
+            if (DrawFancyButton(fontSantabold, musicLabel, musicBtn)) {
                 musicEnabled = !musicEnabled;
             }
 
             // Bouton retour
-            if (DrawButton(fontSantabold, "RETOUR", backBtn, accent, accentLight, 60)) {
+            if (DrawFancyButton(fontSantabold, "Retour", backBtn)) {
                 state = STATE_MENU;
             }
         } break;
@@ -1203,6 +1290,7 @@ int main(void) {
     UnloadTexture(traineau);
     UnloadTexture(background);
     UnloadTexture(principalBG);
+    UnloadTexture(optionsBG);
     UnloadFont(customFont);
     UnloadMusicStream(music);
     CloseAudioDevice();
