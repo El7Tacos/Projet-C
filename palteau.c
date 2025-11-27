@@ -760,30 +760,54 @@ int main(void) {
 
         // ============ OPTIONS ============
         case STATE_OPTIONS: {
-            DrawRectangleGradientV(0, 0, 1920, 1080, bg1, bg2);
-            const char *optTitle = "Options";
-            int optSize = 80;
-            Vector2 optS = MeasureTextEx(customFont, optTitle, optSize, 0);
+            // Même background que le menu principal
+            DrawTexturePro(
+                principalBG,
+                (Rectangle){0, 0, principalBG.width, principalBG.height},
+                (Rectangle){0, 0, 1920, 1080},
+                (Vector2){0, 0},
+                0,
+                WHITE
+            );
 
-            // centrer au milieu de l'écran
+            // Titre OPTIONS avec la même police que le menu
+            const char *optTitle = "OPTIONS";
+            int optSize = 120;
+            Vector2 optS = MeasureTextEx(santaFont, optTitle, optSize, 0);
+
             float optX = 1920/2 - optS.x/2;
+            float optY = 200;
 
-            DrawTextEx(customFont, optTitle, (Vector2){optX, 250}, optSize, 0, accent);
+            DrawTextEx(santaFont, optTitle, (Vector2){optX, optY}, optSize, 0, accent);
 
+            float btnWidth  = 320;
+            float btnHeight = 90;
+            float centerX   = 1920 / 2.0f;
+
+            Rectangle musicBtn = (Rectangle){
+                centerX - btnWidth/2,
+                 450,
+                btnWidth,
+                btnHeight
+            };
+
+            Rectangle backBtn = (Rectangle){
+                centerX - btnWidth/2,
+                580,
+                btnWidth,
+                btnHeight
+            };
 
             // Bouton musique ON/OFF
-            Rectangle musicBtn = (Rectangle){820, 460, 280, 100};
             const char *musicLabel = musicEnabled ? "Musique : ON" : "Musique : OFF";
 
-            if (DrawButton(font, musicLabel, musicBtn,
-                           (Color){200,100,40,255}, (Color){240,130,60,255}, 40)) {
+            if (DrawButton(santaFont, musicLabel, musicBtn,
+                           (Color){200,100,40,255}, (Color){240,130,60,255}, 50)) {
                 musicEnabled = !musicEnabled;
             }
 
             // Bouton retour
-            if (DrawButton(font, "RETOUR",
-                           (Rectangle){820, 700, 280, 100},
-                           accent, accentLight, 50)) {
+            if (DrawButton(santaFont, "RETOUR", backBtn, accent, accentLight, 60)) {
                 state = STATE_MENU;
             }
         } break;
