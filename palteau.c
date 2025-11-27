@@ -602,7 +602,8 @@ int main(void) {
     // LAYOUT : Plateau centré dans la zone gauche
     //-----------------------------------------------------
 
-    Rectangle sidePanel = (Rectangle){1320, 0, 600, 1080};  // panneau à droite
+    // panneau à droite : moins large (ancré au bord droit)
+    Rectangle sidePanel = (Rectangle){1920 - 420, 0, 420, 1080};  // panneau à droite
 
     int tailleCase = 130;  
     int totalCases = 20;   // 0 à 19
@@ -894,17 +895,17 @@ int main(void) {
                         // ----- TITRE TABLEAU DE BORD -----
             // texte centré horizontalement
             const char *dashTitle = "Tableau de bord";
-            float dashSize = 80;
+            float dashSize = 75;
             Vector2 dashMeasure = MeasureTextEx(font, dashTitle, dashSize, 0);
 
             // centre dans le panneau
-            float dashX = sidePanel.x + (sidePanel.width - dashMeasure.x) / 2;
+            float dashX = sidePanel.x + (sidePanel.width - dashMeasure.x) / 2 + 50;
             float dashY = 80;
 
             DrawTextEx(customFont, dashTitle, (Vector2){dashX, dashY}, dashSize, 0, DARKBLUE);
 
             // ---- Soulignement décoratif (ligne verte + ligne bleue) ----
-            float underlineWidth = dashMeasure.x + 20;    // petite marge
+            float underlineWidth = dashMeasure.x - 50 ;    // petite marge
             float underlineX = sidePanel.x + (sidePanel.width - underlineWidth) / 2;
             float underlineY = dashY + dashMeasure.y + 6;
 
@@ -1070,9 +1071,12 @@ int main(void) {
             int textSize = 32;
             Vector2 textMeasure = MeasureTextEx(font, txtTriche, textSize, 0);
 
-            // Position du texte = centré sur le dé truqué
-            float tricheX = sidePanel.x + 80 + 180 + 30 + (180 / 2) - (textMeasure.x / 2);
-            float tricheY = diceY - 60;
+            // Centre X du panneau pour alignements
+            float centerX = sidePanel.x + sidePanel.width / 2.0f;
+
+            // Position du texte = centré horizontalement sur le dé truqué (maintenant au-dessus)
+            float tricheX = centerX - (textMeasure.x / 2.0f);
+            float tricheY = diceY - 260;
 
             // Ombre
             DrawTextEx(font, txtTriche, (Vector2){tricheX + 2, tricheY + 2}, textSize, 0, (Color){0,0,0,80});
@@ -1087,9 +1091,9 @@ int main(void) {
             }
 
 
-                // Dé normal
+                // Dé inférieur (normal) — centré dans le panneau
                 Rectangle diceRect = (Rectangle){
-                    sidePanel.x + 80,
+                    centerX - 180.0f/2.0f,
                     diceY,
                     180,
                     180
@@ -1125,10 +1129,10 @@ int main(void) {
                     }
                 }
 
-                // Dé truqué
+                // Dé supérieur (truqué) — centré dans le panneau
                 Rectangle fixedDiceRect = (Rectangle){
-                    sidePanel.x + 80 + 180 + 30,
-                    diceY,
+                    centerX - 180.0f/2.0f,
+                    diceY - 200,
                     180,
                     180
                 };
