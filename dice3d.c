@@ -164,6 +164,12 @@ void DrawDiceWithDots(Vector3 pos, float size, Color bodyColor, Color dotColor)
 // ============================================================
 int LaunchDice3D(Font font)
 {
+    if (!IsAudioDeviceReady()) InitAudioDevice();
+
+    // 🎵 Son : dé qui roule
+    Sound diceSound = LoadSound("deroulant.mp3");  // SANS ACCENT
+    SetSoundVolume(diceSound, 1.0f); // volume max
+
     // Caméra
     Camera3D camera = {0};
     camera.position = (Vector3){4.0f, 3.0f, 4.0f};
@@ -171,6 +177,8 @@ int LaunchDice3D(Font font)
     camera.up       = (Vector3){0.0f, 1.0f, 0.0f};
     camera.fovy     = 45.0f;
     camera.projection = CAMERA_PERSPECTIVE;
+
+
 
     // Dé
     Dice3D dice = {0};
@@ -180,6 +188,8 @@ int LaunchDice3D(Font font)
     dice.velocity = (Vector3){GetRandomValue(-2, 2)/10.0f, 4.0f, GetRandomValue(-2, 2)/10.0f};
     dice.duration = 2.0f + GetRandomValue(0, 40)/100.0f;
     dice.rolling = true;
+
+    PlaySound(diceSound);
 
     int finalResult = GetRandomValue(1, 6);
     float camAngle = 0.0f;
@@ -200,6 +210,7 @@ int LaunchDice3D(Font font)
     Font fontReplay = LoadFontEx("SantasSleighFull.ttf", 50, 0, 0);
     GenTextureMipmaps(&fontReplay.texture);
     SetTextureFilter(fontReplay.texture, TEXTURE_FILTER_BILINEAR);
+
 
 
     while (!WindowShouldClose()) {
@@ -328,6 +339,6 @@ int LaunchDice3D(Font font)
 
         EndDrawing();
     }
-
+    UnloadSound(diceSound);
     return finalResult;
 }
