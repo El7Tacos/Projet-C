@@ -1262,21 +1262,30 @@ int main(void) {
             DrawTextEx(fontSantabold, winTitle, (Vector2){winTitleX, winTitleY}, winTitleSize, 0,
                        DARKGREEN);
 
-            // Sous-titre long centré sous le titre
-            const char *winSub = "BRAVO, les cadeaux sont tous dans le traineau, la tournee du pere noel peut commencer !";
-            float winSubSize = 42.0f; // un peu plus petit pour tenir en largeur
-            Vector2 winSubMeasure = MeasureTextEx(fontCandy, winSub, winSubSize, 0);
-            float winSubX = 1920 / 2.0f - winSubMeasure.x / 2.0f;
-            float winSubY = winTitleY + winTitleMeasure.y + 40.0f;
-            DrawTextEx(fontCandy, winSub, (Vector2){winSubX, winSubY}, winSubSize, 0,
-                       (Color){0, 80, 120, 255});
+            // Sous-titre sur deux lignes, centré sous le titre
+            const char *winSub1 = "Les cadeaux sont tous dans le traineau";
+            const char *winSub2 = "et la tournee du pere noel peut commencer !";
+            float winSubSize = 55.0f;
+
+            Vector2 winSubMeasure1 = MeasureTextEx(fontSantabold, winSub1, winSubSize, 0);
+            Vector2 winSubMeasure2 = MeasureTextEx(fontSantabold, winSub2, winSubSize, 0);
+
+            float winSub1X = 1920 / 2.0f - winSubMeasure1.x / 2.0f;
+            float winSub2X = 1920 / 2.0f - winSubMeasure2.x / 2.0f;
+            float winSub1Y = winTitleY + winTitleMeasure.y + 40.0f;
+            float winSub2Y = winSub1Y + winSubMeasure1.y + 10.0f;
+
+            DrawTextEx(fontSantabold, winSub1, (Vector2){winSub1X, winSub1Y}, winSubSize, 0,
+                       (DARKGREEN));
+            DrawTextEx(fontSantabold, winSub2, (Vector2){winSub2X, winSub2Y}, winSubSize, 0,
+                       (DARKGREEN));
 
             // Bouton retour menu centré un peu plus haut
             float btnW = 380.0f;
             float btnH = 90.0f;
             Rectangle btnMenu = (Rectangle){
                 1920 / 2.0f - btnW / 2.0f,
-                700.0f, // remonte le bouton
+                600.0f, // remonte le bouton
                 btnW,
                 btnH
             };
