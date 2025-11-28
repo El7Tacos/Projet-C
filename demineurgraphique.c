@@ -611,10 +611,10 @@ static void DrawGame(const Game *g, int ox, int oy,
     // Consignes
     const char *rules =
         "Consignes :\n"
-        "- Decouvrez les cases sans mines.\n"
-        "- Atteignez l'objectif de decouverte pour gagner.\n"
-        "- Clic gauche : reveler | Clic droit : drapeau.\n"
-        "- Si vous perdez : appuyez sur R pour rejouer.";
+        "- Explorer les cases sans tomber sur les mines\n"
+        "- Atteignez l'objectif de decouverte pour gagner\n"
+        "- Clic gauche : decouvrir la case \n"
+        "- Clic droit : marquer la case avec un drapeau\n";
 
     float   fsRules = 40.0f;
     Vector2 mRules  = MeasureTextEx(fontConsignes, rules, fsRules, 0);
@@ -704,41 +704,72 @@ static void DrawGame(const Game *g, int ox, int oy,
     DrawRectangleLines(ox, oy, gridW, gridH, RED);
 
     if (g->gameOver)
+{
+    float fsBoom  = 64.0f;
+    float fsLose  = 40.0f;
+    float fsHint  = 32.0f;
+
+    float baseY = oy + gridH + 10;
+
+    if (g->win)
     {
-        const char *msgWin  = "Bravo, vous avez gagne. Vous pouvez relancer le de.";
-        const char *msgLose = "BOOM ! Vous avez perdu...";
-        float       fs      = 48.0f;
+        // Victoire
+        const char *msgWin = "Bravo, vous avez gagne. Vous pouvez relancer le de.";
+        Vector2 sWin = MeasureTextEx(fontConsignes, msgWin, fsLose, 0);
 
-        const char *msg = g->win ? msgWin : msgLose;
-        Vector2     s   = MeasureTextEx(fontConsignes, msg, fs, 0);
-
-        // Message principal (victoire ou défaite)
         DrawTextEx(
             fontConsignes,
-            msg,
-            (Vector2){ ox + gridW / 2 - s.x / 2, oy + gridH + 40 },
-            fs,
+            msgWin,
+            (Vector2){ ox + gridW/2 - sWin.x/2, baseY },
+            fsLose,
             0,
-            g->win ? GREEN : RED
+            GREEN
+        );
+    }
+    else
+    {
+        // Défaite
+
+        // Ligne 1 : BOOM !
+        const char *boom = "BOOM !";
+        Vector2 sBoom = MeasureTextEx(fontConsignes, boom, fsBoom, 0);
+
+        DrawTextEx(
+            fontConsignes,
+            boom,
+            (Vector2){ ox + gridW/2 - sBoom.x/2, baseY },
+            fsBoom,
+            0,
+            RED
         );
 
-        // En cas de défaite : invite à rejouer
-        if (!g->win)
-        {
-            const char *hint = "Appuyez sur R pour rejouer";
-            float       fs2  = 32.0f;
-            Vector2     s2   = MeasureTextEx(fontConsignes, hint, fs2, 0);
+        // Ligne 2 : Vous avez perdu...
+        const char *lose = "Vous avez perdu...";
+        Vector2 sLose = MeasureTextEx(fontConsignes, lose, fsLose, 0);
 
-            DrawTextEx(
-                fontConsignes,
-                hint,
-                (Vector2){ ox + gridW / 2 - s2.x / 2, oy + gridH + 40 + s.y + 10 },
-                fs2,
-                0,
-                WHITE
-            );
-        }
+        DrawTextEx(
+            fontConsignes,
+            lose,
+            (Vector2){ ox + gridW/2 - sLose.x/2, baseY + sBoom.y + 10 },
+            fsLose,
+            0,
+            RED
+        );
+
+        // Ligne 3 : Rejouer
+        const char *hint = "Appuyez sur ENTRER pour rejouer";
+        Vector2 sHint = MeasureTextEx(fontConsignes, hint, fsHint, 0);
+
+        DrawTextEx(
+            fontConsignes,
+            hint,
+            (Vector2){ ox + gridW/2 - sHint.x/2, baseY + sBoom.y + sLose.y + 25 },
+            fsHint,
+            0,
+            DARKBROWN
+        );
     }
+}
 }
 
 // —————————————————————————————————————————
@@ -877,7 +908,7 @@ static int RunDemineurLevel(int level)
         }
 
         // Réinitialisation possible uniquement après une défaite
-        if (IsKeyPressed(KEY_R) && g.gameOver && !g.win)
+        if (IsKeyPressed(KEY_ENTER) && g.gameOver && !g.win)
         {
             ResetBoard(&g);
             winTime = 0.0f;
