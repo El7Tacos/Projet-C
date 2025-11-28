@@ -435,47 +435,45 @@ void Draw3DBoard(Font font, int totalCases, int offsetX, int offsetY, int taille
         // ------ CASE DEMINEUR FACILE (Case 3) ------
         else if (i == 2) {
             const char *txt = "DEMINEUR";
-            Color col = ecriture_cases; 
+            int size = 26;
+            Vector2 s = MeasureTextEx(font, txt, size, 0);
 
-            Vector2 s = MeasureTextEx(font, txt, 26, 0);
-            DrawTextEx(font, txt,
-                    (Vector2){pos.x + (tailleCase - s.x)/2,
-                                pos.y + (tailleCase - s.y)/2},
-                    22, 0, col);
+            float x = pos.x + (tailleCase - s.x) / 2;
+            float y = pos.y + (tailleCase - s.y) / 2;
 
+            DrawTextEx(font, txt, (Vector2){x, y}, size, 0, (ecriture_cases));
             DrawTextEx(font, TextFormat("%d", i),
-                    (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
 
         // ------ CASE DEMINEUR MOYEN (Case 12) ------
         else if (i == 6) {
             const char *txt = "DEMINEUR";
-            Color col = ecriture_cases;
+            int size = 26;
+            Vector2 s = MeasureTextEx(font, txt, size, 0);
 
-            Vector2 s = MeasureTextEx(font, txt, 26, 0);
-            DrawTextEx(font, txt,
-                    (Vector2){pos.x + (tailleCase - s.x)/2,
-                                pos.y + (tailleCase - s.y)/2},
-                    22, 0, col);
+            float x = pos.x + (tailleCase - s.x) / 2;
+            float y = pos.y + (tailleCase - s.y) / 2;
 
+            DrawTextEx(font, txt, (Vector2){x, y}, size, 0, (ecriture_cases));
             DrawTextEx(font, TextFormat("%d", i),
-                    (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
         }
 
-        // ------ CASE DEMINEUR DIFFICILE (Case 16) ------
+        // ------ CASE DEMINEUR DIFFICILE (Case 13) ------
         else if (i == 13) {
             const char *txt = "DEMINEUR";
-            Color col = ecriture_cases;
+            int size = 26;
+            Vector2 s = MeasureTextEx(font, txt, size, 0);
 
-            Vector2 s = MeasureTextEx(font, txt, 26, 0);
-            DrawTextEx(font, txt,
-                (Vector2){pos.x + (tailleCase - s.x)/2,pos.y + (tailleCase - s.y)/2},22, 0, col);
+            float x = pos.x + (tailleCase - s.x) / 2;
+            float y = pos.y + (tailleCase - s.y) / 2;
 
+            DrawTextEx(font, txt, (Vector2){x, y}, size, 0, (ecriture_cases));
             DrawTextEx(font, TextFormat("%d", i),
-                (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
+                       (Vector2){pos.x + 10, pos.y + 8}, 28, 0, numero_cases);
+
         }
-
-
         // ------ CASE SPÉCIALE 0 : DÉPART ------
         else if (i == 0) {
             const char *txt = "DEPART";
@@ -1021,29 +1019,11 @@ int main(void) {
             float objSize = 50;
             Vector2 objMeasure = MeasureTextEx(fontSantabold, obj, objSize, 0);
 
-            // Position de la carte
-            Rectangle cardObj = {
-                sidePanel.x + 40,
-                underlineY + 25,
-                sidePanel.width - 80,
-                120
-            };
+            // Position du texte (plus de rectangle de fond)
+            float objX = sidePanel.x + (sidePanel.width - objMeasure.x) / 2;
+            float objY = underlineY + 40;
 
-            // Ombre de la carte
-            DrawRectangleRounded(cardObj, 0.15f, 12, (Color){0,0,0,40});
-
-            // Fond de la carte
-            DrawRectangleRounded(
-                (Rectangle){cardObj.x, cardObj.y, cardObj.width, cardObj.height},
-                0.15f, 12,
-                (Color){255,255,255,210}
-            );
-
-            // Position du texte au centre de la carte
-            float objX = cardObj.x + (cardObj.width - objMeasure.x) / 2;
-            float objY = cardObj.y + (cardObj.height - objMeasure.y) / 2;
-
-            // Texte objectif
+            // Texte objectif seul, sans carte blanche
             DrawTextEx(fontSantabold, obj, (Vector2){objX, objY}, objSize, 0, DARKBLUE);
 
 
@@ -1236,6 +1216,11 @@ int main(void) {
 
                 DrawRectangleRounded(fixedDiceRect, 0.35f, 8, WHITE);
                 DrawRectangleRoundedLines(fixedDiceRect, 0.35f, 8, accent);
+
+                // effet bleu au survol
+                if (CheckCollisionPointRec(mouse, fixedDiceRect)) {
+                    DrawDiceHighlight(fixedDiceRect);
+                }
 
                 DrawDiceDots(fixedDiceRect, 1, accentLight);
 
