@@ -598,6 +598,7 @@ int main(void) {
     Texture2D principalBG = LoadTexture("principal.png");
     Texture2D bannerNoel = LoadTexture("perenoel.png");
     Texture2D optionsBG = LoadTexture("option.jpg");
+    Texture2D victoireBG = LoadTexture("victoire.jpg");
 
 
     //-----------------------------------------------------
@@ -1263,18 +1264,25 @@ int main(void) {
 
         // ============ ÉCRAN DE VICTOIRE ============
         case STATE_WIN: {
-            DrawRectangleGradientV(0, 0, 1920, 1080,
-                                   (Color){255,220,160,255}, (Color){255,170,100,255});
-            DrawTextEx(customFont, "BRAVO !", (Vector2){800, 380}, 110, 0, accent);
-            DrawTextEx(font, "Tu as atteint la derniere case !",
-                       (Vector2){640, 540}, 42, 0, DARKGRAY);
+            // Fond de victoire avec l'image Victoire.jpg en plein ecran
+            DrawTexturePro(
+                victoireBG,
+                (Rectangle){0, 0, victoireBG.width, victoireBG.height},
+                (Rectangle){0, 0, 1920, 1080},
+                (Vector2){0, 0},
+                0,
+                WHITE
+            );
 
-            if (DrawButton(font, "RETOUR MENU",
-                           (Rectangle){820, 700, 280, 100},
-                           accent, accentLight, 50)) {
+            // Titre centré en haut, couleur plus voyante (vert fonce)
+            const char *winTitle = "BRAVO !";
+            float winTitleSize = 130.0f;
+            Vector2 winTitleMeasure = MeasureTextEx(fontSantabold, winTitle, winTitleSize, 0);
+            float winTitleX = 1920 / 2.0f - winTitleMeasure.x / 2.0f;
+            float winTitleY = 180.0f; // un peu plus haut
+            DrawTextEx(fontSantabold, winTitle, (Vector2){winTitleX, winTitleY}, winTitleSize, 0,
+                       DARKGREEN);
 
-<<<<<<< HEAD
-=======
             // Sous-titre sur deux lignes, centré sous le titre
             const char *winSub1 = "Les cadeaux sont tous dans le traineau";
             const char *winSub2 = "et la tournee du pere noel peut commencer !";
@@ -1304,10 +1312,9 @@ int main(void) {
             };
 
             if (DrawFancyButton(fontCandy, "RETOUR AU MENU", btnMenu)) {
->>>>>>> 39e79b5ce383cc171ff4b10ca1307ccb6d25515a
                 state = STATE_MENU;
                 SudokuReset();
-                player = (Player){0,0,false, 0.0f};
+                player = (Player){0, 0, false, 0.0f};
                 diceValue = 1;
             }
         } break;
@@ -1322,11 +1329,11 @@ int main(void) {
     UnloadTexture(tree);
     UnloadTexture(gift);
     UnloadTexture(santa);
-    UnloadTexture(cadeau);
     UnloadTexture(traineau);
     UnloadTexture(background);
     UnloadTexture(principalBG);
     UnloadTexture(optionsBG);
+    UnloadTexture(victoireBG);
     UnloadFont(customFont);
     UnloadMusicStream(music);
     CloseAudioDevice();
