@@ -1273,6 +1273,38 @@ int main(void) {
                            (Rectangle){820, 700, 280, 100},
                            accent, accentLight, 50)) {
 
+<<<<<<< HEAD
+=======
+            // Sous-titre sur deux lignes, centré sous le titre
+            const char *winSub1 = "Les cadeaux sont tous dans le traineau";
+            const char *winSub2 = "et la tournee du pere noel peut commencer !";
+            float winSubSize = 55.0f;
+
+            Vector2 winSubMeasure1 = MeasureTextEx(fontSantabold, winSub1, winSubSize, 0);
+            Vector2 winSubMeasure2 = MeasureTextEx(fontSantabold, winSub2, winSubSize, 0);
+
+            float winSub1X = 1920 / 2.0f - winSubMeasure1.x / 2.0f;
+            float winSub2X = 1920 / 2.0f - winSubMeasure2.x / 2.0f;
+            float winSub1Y = winTitleY + winTitleMeasure.y + 40.0f;
+            float winSub2Y = winSub1Y + winSubMeasure1.y + 10.0f;
+
+            DrawTextEx(fontSantabold, winSub1, (Vector2){winSub1X, winSub1Y}, winSubSize, 0,
+                       (DARKGREEN));
+            DrawTextEx(fontSantabold, winSub2, (Vector2){winSub2X, winSub2Y}, winSubSize, 0,
+                       (DARKGREEN));
+
+            // Bouton retour menu centré un peu plus haut
+            float btnW = 380.0f;
+            float btnH = 90.0f;
+            Rectangle btnMenu = (Rectangle){
+                1920 / 2.0f - btnW / 2.0f,
+                600.0f, // remonte le bouton
+                btnW,
+                btnH
+            };
+
+            if (DrawFancyButton(fontCandy, "RETOUR AU MENU", btnMenu)) {
+>>>>>>> 39e79b5ce383cc171ff4b10ca1307ccb6d25515a
                 state = STATE_MENU;
                 SudokuReset();
                 player = (Player){0,0,false, 0.0f};
