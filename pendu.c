@@ -10,7 +10,7 @@
 #define MAX_TRIES 6
 #define WORD_COUNT 22
 #define MAX_SNOW 220
-// Taille max d'un mot (avec le '\0')
+// Taille max d'un mot
 #define MAX_WORD_LEN 64
 
 typedef struct { float x, y, vy, size; } Snowflake;
