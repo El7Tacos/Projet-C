@@ -4,8 +4,7 @@
 #include "raylib.h"
 #include <stdbool.h>
 
-// Lance le Sudoku (ou le reprend)
-// Retourne true si terminé, false si quitté (ESC)
+// Lance le Sudoku
 bool StartSudoku(Font font);
 
 // Reset complet (nouvelle grille)

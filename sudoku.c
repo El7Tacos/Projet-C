@@ -12,7 +12,7 @@
 #define ORIGIN_X 560
 #define ORIGIN_Y 140
 
-// ----- Décor Noël identique au Morpion -----
+// Décor de Noël 
 #define MAX_SNOW 220
 typedef struct { float x, y, vy, size; } Snowflake;
 static Snowflake snow[MAX_SNOW];
@@ -22,7 +22,7 @@ Texture2D backgroundTex;
 Font fontTitle;
 Font fontSubtitle;
 
-// ========================== VARIABLES INTERNES ==========================
+// État interne du sudoku
 static int solution[SIZE][SIZE];
 static int baseGrid[SIZE][SIZE];
 static int grid[SIZE][SIZE];
@@ -32,7 +32,7 @@ static bool initialized = false;
 
 static int sudokuLevel = 2; // 1 = facile, 2 = moyen, 3 = difficile
 
-// ========================== LOGIQUE SUDOKU ==========================
+// Vérifie si une valeur est valide à une position donnée
 static bool isValid(int grid[SIZE][SIZE], int row, int col, int val) {
     for (int i = 0; i < SIZE; i++)
         if (grid[row][i] == val || grid[i][col] == val)
@@ -46,6 +46,7 @@ static bool isValid(int grid[SIZE][SIZE], int row, int col, int val) {
     return true;
 }
 
+// Remplit la grille complète via backtracking
 static bool fillGrid(int grid[SIZE][SIZE]) {
     for (int r = 0; r < SIZE; r++) {
         for (int c = 0; c < SIZE; c++) {
@@ -70,6 +71,7 @@ static bool fillGrid(int grid[SIZE][SIZE]) {
     return true;
 }
 
+// Creuse des cases pour créer la grille jouable
 static void makePuzzle(int grid[SIZE][SIZE], int emptyCount) {
     int removed = 0;
     while (removed < emptyCount) {
@@ -81,6 +83,7 @@ static void makePuzzle(int grid[SIZE][SIZE], int emptyCount) {
     }
 }
 
+// Génère une nouvelle grille et la solution
 static void generateSudoku(void) {
     int temp[SIZE][SIZE] = {0};
     fillGrid(temp);
@@ -107,16 +110,16 @@ static void generateSudoku(void) {
     initialized = true;
 }
 
-// ========================== RÉINITIALISATION ==========================
+// Réinitialisation
 void SudokuReset(void) {
     initialized = false;
     sudokuCompleted = false;
 }
 
-// ========================== STATUT ==========================
 bool SudokuIsCompleted(void) {
     return sudokuCompleted;
 }
+
 void SudokuSetLevel(int level) {
     if (level < 1) level = 1;
     if (level > 3) level = 3;
@@ -125,7 +128,7 @@ void SudokuSetLevel(int level) {
     sudokuCompleted = false;
 }
 
-// ========================== NEIGE ==========================
+// Gestion de la neige
 static void initSnowflakes(int W, int H) {
     for (int i = 0; i < MAX_SNOW; i++) {
         snow[i].x = rand() % W;
@@ -135,6 +138,7 @@ static void initSnowflakes(int W, int H) {
     }
     snow_initialized = true;
 }
+
 static void updateSnowflakes(int W, int H) {
     if (!snow_initialized) initSnowflakes(W, H);
     for (int i = 0; i < MAX_SNOW; i++) {
@@ -147,25 +151,22 @@ static void updateSnowflakes(int W, int H) {
     }
 }
 
-// ========================== LANCEMENT ==========================
+// Boucle principale du mini-jeu Sudoku
 bool StartSudoku(Font ignoredFontFromPlateau) {
 
     SetExitKey(KEY_NULL);
     srand(time(NULL));
     if (!initialized) generateSudoku();
 
-    // ----- CHARGEMENT ASSETS NOËL -----
+    // Noël
     backgroundTex = LoadTexture("background.png");
-    //-----------------------------------------------------
 
-    // 🎵 MUSIQUE SUDOKU : PIANO.mp3
-    //-----------------------------------------------------
+    // Musique PIANO.mp3
     if (!IsAudioDeviceReady()) InitAudioDevice();
 
     Music pianoMusic = LoadMusicStream("PIANO.mp3");
     SetMusicVolume(pianoMusic, 1.0f);
     PlayMusicStream(pianoMusic);
-
 
     fontTitle = LoadFontEx("MerryChristmasFlake.ttf", 80, 0, 0);
     GenTextureMipmaps(&fontTitle.texture);
@@ -196,7 +197,7 @@ bool StartSudoku(Font ignoredFontFromPlateau) {
         selectedRow = (mouse.y - originY) / CELL;
     }
     
-        // ----- ÉCRITURE -----
+        // Ecriture des valeurs dans la grille
         if (selectedRow >= 0 && selectedCol >= 0 &&
             baseGrid[selectedRow][selectedCol] == 0) {
 
@@ -208,10 +209,10 @@ bool StartSudoku(Font ignoredFontFromPlateau) {
                 grid[selectedRow][selectedCol] = 0;
         }
 
-        // ----- RESET -----
+        // Réinitialisation de la grille
         if (IsKeyPressed(KEY_R)) generateSudoku();
 
-        // ----- VÉRIFICATION -----
+        // Vérification de la complétion
         bool full = true, allCorrect = true;
         for (int i = 0; i < SIZE; i++)
             for (int j = 0; j < SIZE; j++) {
@@ -224,7 +225,7 @@ bool StartSudoku(Font ignoredFontFromPlateau) {
             sudokuCompleted = true;
         }
 
-        // ----- UPDATE NEIGE -----
+        // Neige maj
         updateSnowflakes(W, H);
 
         // =====================================================================
@@ -232,7 +233,7 @@ bool StartSudoku(Font ignoredFontFromPlateau) {
         // =====================================================================
         BeginDrawing();
 
-        // ---- 1) Fond Noël (exact Morpion) ----
+        // Fond de Noël
         float scale = fmax((float)W / backgroundTex.width,
                            (float)H / backgroundTex.height);
 
@@ -246,18 +247,18 @@ bool StartSudoku(Font ignoredFontFromPlateau) {
             (Rectangle){posX, posY, newW, newH},
             (Vector2){0,0}, 0, WHITE);
 
-        // ---- 2) Titre ----
+        // Titre
         DrawTextEx(fontTitle, "Mini-Jeu : Sudoku",
                    (Vector2){ W/2 - MeasureTextEx(fontTitle,
                    "Mini-Jeu : Sudoku", 80, 2).x/2, 40},
                    80, 2, DARKBLUE);
 
-        // ---- 4) Neige ----
+        // Neige
         for (int i = 0; i < MAX_SNOW; i++)
             DrawCircle(snow[i].x, snow[i].y, snow[i].size,
                        Fade(RAYWHITE, 0.95f));
 
-        // ---- 5) Zone Sudoku ----
+        // Zone Sudoku
         for (int i = 0; i < SIZE; i++)
             for (int j = 0; j < SIZE; j++) {
 
@@ -265,7 +266,6 @@ bool StartSudoku(Font ignoredFontFromPlateau) {
                 Color bg = ((i + j) % 2 == 0) ? (Color){245,245,245,255} : WHITE;
 
                 DrawRectangle(originX + j*CELL, originY + i*CELL, CELL, CELL, bg);
-
 
                 if (v > 0) {
                     Color c = baseGrid[i][j]
@@ -279,11 +279,10 @@ bool StartSudoku(Font ignoredFontFromPlateau) {
                         (Vector2){ originX + j*CELL + (CELL - m.x)/2,
                                    originY + i*CELL + (CELL - m.y)/2 },
                         CELL*0.6f, 0, c);
-             
                 }
             }
 
-        // ---- 6) Ligne du Sudoku ----
+        // Lignes du Sudoku
         for (int i = 0; i <= SIZE; i++) {
             int thick = (i % 3 == 0) ? 3 : 1;
             DrawLineEx((Vector2){originX, originY + i*CELL},
@@ -293,19 +292,17 @@ bool StartSudoku(Font ignoredFontFromPlateau) {
             DrawLineEx((Vector2){originX + i*CELL, originY},
            (Vector2){originX + i*CELL, originY + CELL*SIZE},
            thick, RED);
-
         }
 
-        // ---- 7) Surlignage case sélectionnée ----
+        // Surlignage de la case sélectionnée
         if (selectedRow >= 0 && selectedCol >= 0)
         DrawRectangleLinesEx(
             (Rectangle){ originX + selectedCol*CELL,
                          originY + selectedRow*CELL,
                          CELL, CELL },
             3, BLUE);
-        
 
-        // ---- 9) Message si terminé ----
+        // Message de complétion
         if (sudokuCompleted) {
             DrawTextEx(fontTitle, "Sudoku terminé !",
                 (Vector2){ W/2 - MeasureTextEx(fontTitle,

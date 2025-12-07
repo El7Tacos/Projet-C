@@ -4,20 +4,20 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <math.h>          
+#include <math.h>
 #include "raylib.h"
 
 #define MAX_TRIES 6
 #define WORD_COUNT 22
 #define MAX_SNOW 220
-// Taille maximale d'un mot géré (inclut le '\0')
+// Taille max d'un mot (avec le '\0')
 #define MAX_WORD_LEN 64
 
 typedef struct { float x, y, vy, size; } Snowflake;
 static Snowflake snow[MAX_SNOW];
 static bool snow_initialized = false;
 
-// Structure regroupant l'état du jeu
+// Structure
 typedef struct {
     const char *word;
     int wordLength;
@@ -31,11 +31,10 @@ typedef struct {
     int shouldExit;
 } GameState;
 
-
 // Liste de mots de Noël
 const char *words[WORD_COUNT] = {
     "sapin", "renne", "cadeau", "neige", "guirlande", "boule", "etoile", "cloche", "flocon", "bougie",
-    "chaussette", "elfe", "lutin","reveillon", "chocolat", "chant", "buche", "biscuit", 
+    "chaussette", "elfe", "lutin", "reveillon", "chocolat", "chant", "buche", "biscuit",
     "traineau", "decoration", "bougies", "jouets"
 };
 
@@ -69,7 +68,7 @@ const int azertyKeys[26] = {
     KEY_Z  // z
 };
 
-// AZERTY chars correspondant aux touches ci-dessus
+// AZERTY correspondances
 const char azertyChars[26] = {
     'a', // KEY_Q
     'b', // KEY_B
@@ -99,7 +98,6 @@ const char azertyChars[26] = {
     'w'  // KEY_W
 };
 
-
 void DrawSimplePendu(int tries) {
     // Couleurs
     Color skin = (Color){255, 224, 189, 255};
@@ -121,19 +119,19 @@ void DrawSimplePendu(int tries) {
     DrawCircle(baseX + 243, baseY + 80, 5, gold);
 
     // --- Père Noël ---
-    int x = baseX + 240; 
-    int y = baseY + 130; 
+    int x = baseX + 240;
+    int y = baseY + 130;
 
     if (tries >= 1) {
         // --- Tête ---
-        DrawCircle(x, y, 50, skin); 
+        DrawCircle(x, y, 50, skin);
 
         // Bonnet
         DrawCircle(x, y - 35, 55, red);
         DrawRectangle(x - 55, y - 15, 110, 16, white);
         DrawCircle(x + 50, y - 50, 12, white);
 
-        // Barbe 
+        // Barbe
         DrawCircle(x, y + 30, 40, white);
         DrawRectangle(x - 40, y + 30, 80, 40, white);
 
@@ -145,10 +143,10 @@ void DrawSimplePendu(int tries) {
 
     if (tries >= 2) {
         // --- Corps ---
-        DrawRectangle(x - 35, y + 60, 70, 100, red); 
-        DrawRectangle(x - 35, y + 100, 70, 12, white); 
-        DrawRectangle(x - 35, y + 115, 70, 12, black); 
-        DrawRectangle(x - 5, y + 115, 10, 12, gold); 
+        DrawRectangle(x - 35, y + 60, 70, 100, red);
+        DrawRectangle(x - 35, y + 100, 70, 12, white);
+        DrawRectangle(x - 35, y + 115, 70, 12, black);
+        DrawRectangle(x - 5, y + 115, 10, 12, gold);
     }
 
     if (tries >= 3) {
@@ -197,7 +195,7 @@ void updateSnowflakes(int screenW, int screenH) {
     }
 }
 
-// Prototypes pour la décomposition fonctionnelle
+// Prototypes 
 void InitGame(GameState *gs);
 void HandleInput(GameState *gs);
 void UpdateGame(GameState *gs);
@@ -216,7 +214,7 @@ void InitGame(GameState *gs) {
     gs->won = false;
     gs->winTimer = 0.0f;
     gs->winCountdownActive = 0;
-        gs->shouldExit = 0; // Initialize shouldExit to false
+    gs->shouldExit = 0;  // indicateur pour quitter
 }
 
 // Gère les entrées du joueur (lettres et reset)
@@ -290,7 +288,7 @@ int main() {
     InitWindow(screenWidth, screenHeight, "Mini-Jeu : Pendu");
 
     //-----------------------------------------------------
-    // 🎵 MUSIQUE PENDU : PIANO.mp3
+    // MUSIQUE PENDU : PIANO.mp3
     //-----------------------------------------------------
     if (!IsAudioDeviceReady()) InitAudioDevice();
 
@@ -300,141 +298,134 @@ int main() {
 
     initSnowflakes(screenWidth, screenHeight);
 
-    
     SetTargetFPS(60);
 
     // Polices et fond
-    Font fontNoel   = LoadFontEx("MerryChristmasFlake.ttf", 80, 0, 0);      // Pour le titre
-    Font fontSleigh = LoadFontEx("SantasSleighFull.ttf", 50, 0, 0);          // Pour texte courant
-    Font fontWin    = LoadFontEx("SantasSleighFull Bold.ttf", 80, 0, 0);     // Pour messages fin
+    Font fontNoel = LoadFontEx("MerryChristmasFlake.ttf", 80, 0, 0);      // Pour le titre
+    Font fontSleigh = LoadFontEx("SantasSleighFull.ttf", 50, 0, 0);      // Pour texte courant
+    Font fontWin = LoadFontEx("SantasSleighFull Bold.ttf", 80, 0, 0);    // Pour messages fin
     Texture2D background = LoadTexture("background.png");
     Texture2D neige = LoadTexture("neige.png");
-
 
     srand(time(NULL));
 
     GameState gs = {0};
     InitGame(&gs);
 
-
-    while (true) {    
-
+    while (true) {
         UpdateMusicStream(pianoMusic);
 
-        if (IsKeyDown(KEY_LEFT_ALT) && IsKeyDown(KEY_F4)) break;   // Alt+F4 pour quitter
-        // Input AZERTY
-            // Tableau des lettres correspondant aux touches AZERTY
+        // Alt+F4 pour quitter
+        if (IsKeyDown(KEY_LEFT_ALT) && IsKeyDown(KEY_F4)) break;
 
-    HandleInput(&gs);
-    UpdateGame(&gs);
+        // Entrées clavier (AZERTY)
+        HandleInput(&gs);
+        UpdateGame(&gs);
 
-    if (gs.shouldExit) break;
+        if (gs.shouldExit) break;
 
-    updateSnowflakes(screenWidth, screenHeight);
+        updateSnowflakes(screenWidth, screenHeight);
 
+        // ---------------------
+        // Dessin
+        // ---------------------
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
 
-////////////////////////////// 
-// Dessin
-////////////////////////////////
-    BeginDrawing();
-    ClearBackground(RAYWHITE);
+        // Fond centré
+        float scale = fmax((float)GetScreenWidth() / background.width,
+                           (float)GetScreenHeight() / background.height);
+        int newWidth = background.width * scale;
+        int newHeight = background.height * scale;
+        int posX = (GetScreenWidth() - newWidth) / 2;
+        int posY = (GetScreenHeight() - newHeight) / 2;
+        DrawTexturePro(background,
+                       (Rectangle){0, 0, (float)background.width, (float)background.height},
+                       (Rectangle){(float)posX, (float)posY, (float)newWidth, (float)newHeight},
+                       (Vector2){0, 0}, 0.0f, WHITE);
 
-    // Fond centré
-    float scale = fmax((float)GetScreenWidth()/background.width,
-                        (float)GetScreenHeight()/background.height);
-    int newWidth = background.width * scale;
-    int newHeight = background.height * scale;
-    int posX = (GetScreenWidth() - newWidth)/2;
-    int posY = (GetScreenHeight() - newHeight)/2;
-    DrawTexturePro(background,
-                    (Rectangle){0,0,(float)background.width,(float)background.height},
-                    (Rectangle){(float)posX,(float)posY,(float)newWidth,(float)newHeight},
-                    (Vector2){0,0},0.0f,WHITE);
+        // Neige animée
+        for (int i = 0; i < MAX_SNOW; i++) {
+            DrawCircle((int)snow[i].x, (int)snow[i].y, snow[i].size, Fade(RAYWHITE, 0.95f));
+        }
 
+        // Titre centré
+        float titleSize = 80.0f;
+        Vector2 titlePos = {
+            GetScreenWidth() / 2 - MeasureTextEx(fontNoel, "Pendu de Noel", titleSize, 2).x / 2,
+            100
+        };
+        DrawTextEx(fontNoel, "Pendu de Noel", titlePos, titleSize, 2, RED);
 
-    // Neige animée
-    for (int i = 0; i < MAX_SNOW; i++) {
-        DrawCircle((int)snow[i].x, (int)snow[i].y, snow[i].size, Fade(RAYWHITE, 0.95f));
-    }               
+        // Texte mot et lettres
+        int offsetXRight = 1300;
 
-    // Titre centré
-    float titleSize = 80.0f;
-    Vector2 titlePos = {
-        GetScreenWidth()/2 - MeasureTextEx(fontNoel, "Pendu de Noel", titleSize, 2).x/2,
-        100
-    };
-    DrawTextEx(fontNoel, "Pendu de Noel", titlePos, titleSize, 2, RED);
+        // "Mot à deviner:"
+        DrawTextEx(fontWin, "Mot a deviner:", (Vector2){offsetXRight, 150}, 50, 2, DARKGREEN);
 
-    // Texte mot et lettres 
-    int offsetXRight = 1300;
+        // Mot deviné
+        DrawTextEx(fontSleigh, gs.guessed, (Vector2){offsetXRight, 220}, 60, 2, BLACK);
 
-    // "Mot à deviner:" 
-    DrawTextEx(fontWin, "Mot a deviner:", (Vector2){offsetXRight, 150}, 50, 2, DARKGREEN);
+        // Lettres essayées
+        DrawTextEx(fontWin, "Lettres essayees:", (Vector2){offsetXRight, 350}, 50, 2, MAROON);
 
-    // Mot deviné
-    DrawTextEx(fontSleigh, gs.guessed, (Vector2){offsetXRight, 220}, 60, 2, BLACK);
+        // Lettres déjà proposées
+        char lettersStr[60] = {0};
+        int pos = 0;
+        for (int i = 0; i < gs.guessedCount; i++) {
+            lettersStr[pos++] = gs.guessedLetters[i];
+            lettersStr[pos++] = ' ';
+        }
+        lettersStr[pos] = '\0';
+        DrawTextEx(fontSleigh, lettersStr, (Vector2){offsetXRight, 400}, 50, 2, DARKBLUE);
 
-    // "Lettres essayees:" 
-    DrawTextEx(fontWin, "Lettres essayees:", (Vector2){offsetXRight, 350}, 50, 2, MAROON);
+        // Positionner la neige devant le bas du poteau
+        int baseX = 700;
+        int baseY = 350;
+        int poteauHeight = 550;
+        int poteauWidth = 40;
 
-    // Lettres déjà proposées
-    char lettersStr[60] = {0};
-    int pos = 0;
-    for (int i = 0; i < gs.guessedCount; i++) {
-        lettersStr[pos++] = gs.guessedLetters[i];
-        lettersStr[pos++] = ' ';
+        Rectangle sourceRec = {0, 0, (float)neige.width, (float)neige.height}; // taille originale
+        Rectangle destRec = {
+            baseX + poteauWidth / 2 - (neige.width / 2) / 2.0f,   // X centré sur poteau
+            baseY + poteauHeight - (neige.height / 2.0f) + 20,    // Y aligné sur le bas du poteau
+            neige.width / 2.0f,                                   // largeur réduite de moitié
+            neige.height / 2.0f                                   // hauteur réduite de moitié
+        };
+        Vector2 origin = {0, 0};
+
+        // Pendu
+        DrawSimplePendu(gs.tries);
+
+        // Neige
+        DrawTexturePro(neige, sourceRec, destRec, origin, 0.0f, WHITE);
+
+        // Messages fin
+        float offsetX = -200;
+
+        if (gs.won)
+            DrawTextEx(fontWin, "Vous avez gagne !",
+                       (Vector2){GetScreenWidth() / 2 - MeasureTextEx(fontWin, "Vous avez gagne !", 50, 2).x / 2 + offsetX, 920},
+                       50, 2, DARKGREEN);
+        else if (gs.tries >= MAX_TRIES) {
+            DrawTextEx(fontWin, "Vous avez perdu ! Le mot etait:",
+                       (Vector2){GetScreenWidth() / 2 - MeasureTextEx(fontWin, "Vous avez perdu ! Le mot etait:", 50, 2).x / 2 + offsetX, 920},
+                       50, 2, MAROON);
+            DrawTextEx(fontWin, gs.word,
+                       (Vector2){GetScreenWidth() / 2 - MeasureTextEx(fontWin, gs.word, 60, 2).x / 2 + offsetX, 960},
+                       60, 2, DARKBLUE);
+        }
+
+        // Message reset si perdu
+        if (!gs.won && gs.tries >= MAX_TRIES) {
+            DrawTextEx(fontWin, "Appuyez sur ENTRER pour rejouer",
+                       (Vector2){GetScreenWidth() / 2 - MeasureTextEx(fontWin,
+                                                                      "Appuyez sur ENTRER pour rejouer", 40, 1).x / 2, 250},
+                       40, 1, DARKBROWN);
+        }
+
+        EndDrawing();
     }
-    lettersStr[pos] = '\0';
-    DrawTextEx(fontSleigh, lettersStr, (Vector2){offsetXRight, 400}, 50, 2, DARKBLUE);
-
-    // Positionner la neige devant le bas du poteau
-    int baseX = 700;    
-    int baseY = 350;
-    int poteauHeight = 550;
-    int poteauWidth = 40;
-
-    Rectangle sourceRec = { 0, 0, (float)neige.width, (float)neige.height }; // taille originale
-    Rectangle destRec = {
-        baseX + poteauWidth / 2 - (neige.width / 2) / 2.0f,   // X centré sur poteau
-        baseY + poteauHeight - (neige.height / 2.0f) + 20,   // Y aligné sur le bas du poteau
-        neige.width / 2.0f,                                 // largeur réduite de moitié
-        neige.height / 2.0f                                // hauteur réduite de moitié
-    };
-    Vector2 origin = { 0, 0 };
-
-    // Pendu
-    DrawSimplePendu(gs.tries);
-    
-    // Neige
-    DrawTexturePro(neige, sourceRec, destRec, origin, 0.0f, WHITE);
-
-    // Messages fin
-    float offsetX = -200; 
-
-    if (gs.won)
-    DrawTextEx(fontWin, "Vous avez gagne !",
-        (Vector2){GetScreenWidth()/2 - MeasureTextEx(fontWin,"Vous avez gagne !",50,2).x/2 + offsetX, 920},
-        50, 2, DARKGREEN);
-    else if (gs.tries >= MAX_TRIES) {
-        DrawTextEx(fontWin, "Vous avez perdu ! Le mot etait:",
-                (Vector2){GetScreenWidth()/2 - MeasureTextEx(fontWin,"Vous avez perdu ! Le mot etait:",50,2).x/2 + offsetX, 920},
-                50, 2, MAROON);
-    DrawTextEx(fontWin, gs.word,
-        (Vector2){GetScreenWidth()/2 - MeasureTextEx(fontWin,gs.word,60,2).x/2 + offsetX, 960},
-        60, 2, DARKBLUE);
-    }
-
-    // Reset 
-    if (!gs.won && gs.tries >= MAX_TRIES) {
-    DrawTextEx(fontWin, "Appuyez sur ENTRER pour rejouer",
-               (Vector2){GetScreenWidth()/2 - MeasureTextEx(fontWin,"Appuyez sur ENTRER pour rejouer",40,1).x/2, 250},
-               40, 1, DARKBROWN);
-    }
-
-
-    EndDrawing();
-
-}
 
     UnloadTexture(background);
     UnloadTexture(neige);
