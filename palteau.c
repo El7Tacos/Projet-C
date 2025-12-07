@@ -1042,7 +1042,6 @@ int main(void) {
                 player.animTimer += GetFrameTime() * 3.0f;
                 if (player.animTimer >= 1.0f) {
                     player.animTimer = 0.0f;
-
                     if (player.pos == player.cible) {
                         player.isMoving = false;
                         arrived = true;
@@ -1050,13 +1049,10 @@ int main(void) {
                         if (player.pos < player.cible && player.pos < totalCases - 1) {
                             player.pos++;
                         } else if (player.pos > player.cible && player.pos > 0) {
-                            player.pos--;
-                        }
-
+                            player.pos--; }
                         if (player.pos == player.cible) {
                             player.isMoving = false;
-                            arrived = true;
-                        }
+                            arrived = true;}
                     }
                 }
             }

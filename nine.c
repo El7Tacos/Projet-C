@@ -1,60 +1,56 @@
 #include "nine.h"
 #include "raylib.h"
 
-// Fonction appelée quand on arrive sur la case 5
+// Case 9 : tu recules de 6 cases après une courte pause
 void HandleCaseNine(Player *player, int totalCases, Font font, bool *trapActive, float *trapTimer)
 {
     // Durée de la pause avant le recul
-    const float pauseBeforeMove = 1.2f;   // lisible mais pas trop long
+    const float pauseBeforeMove = 1.2f;
 
-    // 🔥 1) Activation initiale du piège — on PAUSE et on NE BOUGE PAS
+    // Première activation : on lance la pause, sans bouger le pion
     if (!(*trapActive)) {
         *trapActive = true;
-        *trapTimer = pauseBeforeMove;     // compte à rebours avant de reculer
-        return;                            // stop ici → pas de mouvement maintenant
+        *trapTimer = pauseBeforeMove;
+        return;
     }
 
-    // 🔥 2) Tant que la pause n’est PAS finie → on affiche juste le message
+    // Tant que la pause n'est pas finie, on affiche le message
     if (*trapTimer > 0.0f) {
         *trapTimer -= GetFrameTime();
 
-        // Message géant et centré
         int msgSize = 55;
         const char *txt = "PIEGE ! Tu recules de 6 cases !";
 
-        // Centrage horizontal
         Vector2 txtSize = MeasureTextEx(font, txt, msgSize, 0);
         float msgX = (1920 - txtSize.x) / 2;
-        float msgY = 900; // bas de l'écran comme tu voulais
+        float msgY = 900;
 
-        DrawTextEx(font, txt, (Vector2){msgX, msgY}, msgSize, 0,
-                   (Color){0,120,0,255});  // VERT SAPIN STYLE DEPART
+        DrawTextEx(font, txt, (Vector2){ msgX, msgY }, msgSize, 0,
+                   (Color){ 0, 120, 0, 255 });  // vert sapin
 
-        return; // toujours aucune mise en mouvement
+        return;
     }
 
-    // 🔥 3) La pause est terminée → lancer le recul d'une case
+    // Une fois la pause terminée, on recule de 6 cases (sans passer sous 0)
     if (!player->isMoving) {
-
         int recul = 6;
 
         if (player->pos - recul >= 0)
             player->cible = player->pos - recul;
         else
-            player->cible = 0;  // jamais sous zéro
-        
+            player->cible = 0;
 
-        player->isMoving = true;  // maintenant on bouge
-        *trapActive = false;      // piège terminé
+        player->isMoving = true;
+        *trapActive = false;
     }
 
-    // 🔥 4) Affichage du message pendant qu'il commence à reculer
+    // On garde le message affiché pendant le mouvement
     int msgSize = 55;
     const char *txt = "PIEGE ! Tu recules de 6 cases !";
     Vector2 txtSize = MeasureTextEx(font, txt, msgSize, 0);
     float msgX = (1920 - txtSize.x) / 2;
     float msgY = 900;
 
-    DrawTextEx(font, txt, (Vector2){msgX, msgY}, msgSize, 0,
-               (Color){0,120,0,255});
+    DrawTextEx(font, txt, (Vector2){ msgX, msgY }, msgSize, 0,
+               (Color){ 0, 120, 0, 255 });
 }

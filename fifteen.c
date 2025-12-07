@@ -7,14 +7,14 @@ void HandleCaseFifteen(Player *player, int totalCases, Font font,
 {
     const float pauseBeforeMove = 1.2f;
 
-    // 1) Première activation → pause + message
+    // Première fois sur la case : petite pause avec message
     if (!(*trapActive15)) {
         *trapActive15 = true;
         *trapTimer15 = pauseBeforeMove;
         return;
     }
 
-    // 2) Tant que le timer n'est pas fini → afficher message
+    // Tant que le timer n'est pas terminé, on affiche le message
     if (*trapTimer15 > 0.0f) {
         *trapTimer15 -= GetFrameTime();
 
@@ -25,15 +25,14 @@ void HandleCaseFifteen(Player *player, int totalCases, Font font,
         float x = (1920 - s.x) / 2;
         float y = 900;
 
-        DrawTextEx(font, txt, (Vector2){x, y}, size, 0,
-                   (Color){0,120,200,255}); // bleu cadeau
+        DrawTextEx(font, txt, (Vector2){ x, y }, size, 0,
+                   (Color){ 0, 120, 200, 255 });  // bleu cadeau
 
         return;
     }
 
-    // 3) Lancer l'avance de 4 cases
+    // Ensuite, on fait avancer de 4 cases
     if (!player->isMoving) {
-
         int avance = 4;
         if (player->pos + avance < totalCases)
             player->cible = player->pos + avance;
@@ -44,7 +43,7 @@ void HandleCaseFifteen(Player *player, int totalCases, Font font,
         *trapActive15 = false;
     }
 
-    // 4) Affiche message pendant le mouvement
+    // On garde le message affiché pendant le mouvement
     const char *txt = "BONUS ! Tu avances de 4 cases !";
     int size = 55;
 
@@ -52,6 +51,6 @@ void HandleCaseFifteen(Player *player, int totalCases, Font font,
     float x = (1920 - s.x) / 2;
     float y = 900;
 
-    DrawTextEx(font, txt, (Vector2){x, y}, size, 0,
-               (Color){0,120,200,255});
+    DrawTextEx(font, txt, (Vector2){ x, y }, size, 0,
+               (Color){ 0, 120, 200, 255 });
 }

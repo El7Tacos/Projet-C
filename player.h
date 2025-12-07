@@ -12,3 +12,4 @@ typedef struct {
 } Player;
 
 #endif
+

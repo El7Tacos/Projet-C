@@ -1,4 +1,4 @@
-// gcc demineurgraphique.c -Iinclude -Llib -lraylib -lopengl32 -lgdi32 -lwinmm -o demineur.exe
+// pas de compilation car un fichier .h sert à lancer le mini-jeu dans plateau.c
 
 #include "raylib.h"
 #include <stdlib.h>
@@ -14,7 +14,7 @@ Texture2D gFlagTex;
 #define MAX_SNOW 200
 
 // —————————————————————————————————————————
-// STRUCTURES
+// Structures
 // —————————————————————————————————————————
 
 typedef struct
@@ -49,7 +49,7 @@ typedef struct
 } Game;
 
 // —————————————————————————————————————————
-// PROTOTYPES
+// Prototypes
 // —————————————————————————————————————————
 
 static void InitGame(Game *g, int size, int mines);
@@ -78,7 +78,7 @@ static void DrawCellVisual(const Cell *c, int x, int y, int size,
 static int RunDemineurLevel(int level);
 
 // —————————————————————————————————————————
-// ALLOCATION / INIT
+// Init
 // —————————————————————————————————————————
 
 static void InitGame(Game *g, int size, int mines)
@@ -179,7 +179,7 @@ static void PlaceMines(Game *g, int safeR, int safeC)
 
     int available = totalCells - forbidden;
 
-    // Sécurité : éviter de demander plus de mines que de cases possibles
+    // On evite de demander plus de mines que de cases possibles
     if (g->mineCount > available)
     {
         g->mineCount = available;
@@ -249,7 +249,7 @@ static void ComputeNeighborCounts(Game *g)
 }
 
 // —————————————————————————————————————————
-// RÉVÉLATION / DRAPEAUX
+// Révélations et drapeaux
 // —————————————————————————————————————————
 
 static void RevealEmpty(Game *g, int row, int col)
@@ -460,7 +460,7 @@ static void CheckWin(Game *g)
 }
 
 // —————————————————————————————————————————
-// NEIGE
+// Neige
 // —————————————————————————————————————————
 
 static void InitSnow(Snowflake *snow, int count, int w, int h)
@@ -500,7 +500,7 @@ static void DrawSnow(const Snowflake *s, int count)
 }
 
 // —————————————————————————————————————————
-// AFFICHAGE DES CASES
+// Affichage des cases
 // —————————————————————————————————————————
 
 static void DrawCellVisual(const Cell *c, int x, int y, int size,
@@ -584,7 +584,7 @@ static void DrawCellVisual(const Cell *c, int x, int y, int size,
 }
 
 // —————————————————————————————————————————
-// DRAW GAME
+// Affichage du mini-jeu
 // —————————————————————————————————————————
 
 static void DrawGame(const Game *g, int ox, int oy,
@@ -704,76 +704,76 @@ static void DrawGame(const Game *g, int ox, int oy,
     DrawRectangleLines(ox, oy, gridW, gridH, RED);
 
     if (g->gameOver)
-{
-    float fsBoom  = 64.0f;
-    float fsLose  = 40.0f;
-    float fsHint  = 32.0f;
-
-    float baseY = oy + gridH + 10;
-
-    if (g->win)
     {
-        // Victoire
-        const char *msgWin = "Bravo, vous avez gagne. Vous pouvez relancer le de.";
-        Vector2 sWin = MeasureTextEx(fontConsignes, msgWin, fsLose, 0);
+        float fsBoom  = 64.0f;
+        float fsLose  = 40.0f;
+        float fsHint  = 32.0f;
 
-        DrawTextEx(
-            fontConsignes,
-            msgWin,
-            (Vector2){ ox + gridW/2 - sWin.x/2, baseY },
-            fsLose,
-            0,
-            GREEN
-        );
+        float baseY = oy + gridH + 10;
+
+        if (g->win)
+        {
+            // Victoire
+            const char *msgWin = "Bravo, vous avez gagne. Vous pouvez relancer le de.";
+            Vector2 sWin = MeasureTextEx(fontConsignes, msgWin, fsLose, 0);
+
+            DrawTextEx(
+                fontConsignes,
+                msgWin,
+                (Vector2){ ox + gridW/2 - sWin.x/2, baseY },
+                fsLose,
+                0,
+                GREEN
+            );
+        }
+        else
+        {
+            // Défaite
+
+            // Ligne 1 : BOOM !
+            const char *boom = "BOOM !";
+            Vector2 sBoom = MeasureTextEx(fontConsignes, boom, fsBoom, 0);
+
+            DrawTextEx(
+                fontConsignes,
+                boom,
+                (Vector2){ ox + gridW/2 - sBoom.x/2, baseY },
+                fsBoom,
+                0,
+                RED
+            );
+
+            // Ligne 2 : Vous avez perdu...
+            const char *lose = "Vous avez perdu...";
+            Vector2 sLose = MeasureTextEx(fontConsignes, lose, fsLose, 0);
+
+            DrawTextEx(
+                fontConsignes,
+                lose,
+                (Vector2){ ox + gridW/2 - sLose.x/2, baseY + sBoom.y + 10 },
+                fsLose,
+                0,
+                RED
+            );
+
+            // Ligne 3 : Rejouer
+            const char *hint = "Appuyez sur ENTRER pour rejouer";
+            Vector2 sHint = MeasureTextEx(fontConsignes, hint, fsHint, 0);
+
+            DrawTextEx(
+                fontConsignes,
+                hint,
+                (Vector2){ ox + gridW/2 - sHint.x/2, baseY + sBoom.y + sLose.y + 25 },
+                fsHint,
+                0,
+                DARKBROWN
+            );
+        }
     }
-    else
-    {
-        // Défaite
-
-        // Ligne 1 : BOOM !
-        const char *boom = "BOOM !";
-        Vector2 sBoom = MeasureTextEx(fontConsignes, boom, fsBoom, 0);
-
-        DrawTextEx(
-            fontConsignes,
-            boom,
-            (Vector2){ ox + gridW/2 - sBoom.x/2, baseY },
-            fsBoom,
-            0,
-            RED
-        );
-
-        // Ligne 2 : Vous avez perdu...
-        const char *lose = "Vous avez perdu...";
-        Vector2 sLose = MeasureTextEx(fontConsignes, lose, fsLose, 0);
-
-        DrawTextEx(
-            fontConsignes,
-            lose,
-            (Vector2){ ox + gridW/2 - sLose.x/2, baseY + sBoom.y + 10 },
-            fsLose,
-            0,
-            RED
-        );
-
-        // Ligne 3 : Rejouer
-        const char *hint = "Appuyez sur ENTRER pour rejouer";
-        Vector2 sHint = MeasureTextEx(fontConsignes, hint, fsHint, 0);
-
-        DrawTextEx(
-            fontConsignes,
-            hint,
-            (Vector2){ ox + gridW/2 - sHint.x/2, baseY + sBoom.y + sLose.y + 25 },
-            fsHint,
-            0,
-            DARKBROWN
-        );
-    }
-}
 }
 
 // —————————————————————————————————————————
-// BOUCLE PRINCIPALE DU MINI-JEU
+// Boucle principale du mini-jeu
 // —————————————————————————————————————————
 
 static int RunDemineurLevel(int level)
@@ -785,6 +785,7 @@ static int RunDemineurLevel(int level)
     //InitWindow(screenW, screenH, "Mini-Jeu : Demineur");
     //SetWindowPosition(0, 0);
     //SetTargetFPS(60);
+    //Ce bloc servait pour l'uitlisation seule du démineur
 
     // Polices pour le jeu
     Font fontConsignes = LoadFontEx("SantasSleighFull Bold.ttf", 64, 0, 0);
@@ -981,7 +982,7 @@ static int RunDemineurLevel(int level)
 }
 
 // —————————————————————————————————————————
-// MAIN EXTERNE
+// Main externe (dans le.h)
 // —————————————————————————————————————————
 
 int StartDemineur(int level)
